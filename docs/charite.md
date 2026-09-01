@@ -4,11 +4,13 @@ This page documents the `charite` Nextflow profile for running Nextflow and nf-c
 
 > Contact: Scientific Computing, GB IT, Charité — sc-hpc-helpdesk@charite.de
 
+The config uses **Slurm** and **Apptainer**. Apptainer requires no module loading.
+
 ## Requesting Access
 
 The Charité internal user documentation/wiki requires a Charité GitLab account. To request access:
 1. Email sc-hpc-helpdesk@charite.de to request access to the Charité HPC — this initiates the onboarding process.
-2. If you do not have access to git.bihealth.org, contact health-data@charite.de to request GitLab access for the Charité HPC User Documentation and Onboarding Guide: https://git.bihealth.org/charite-sc-public/sc-wiki/-/wikis/home
+2. If you do not have access to git.bihealth.org, contact health-data@charite.de to request GitLab access for the [Charité HPC User Documentation and Onboarding Guide](https://git.bihealth.org/charite-sc-public/sc-wiki/-/wikis/home).
 
 ## Contributors and Acknowledgments
 
@@ -16,20 +18,20 @@ The Charité internal user documentation/wiki requires a Charité GitLab account
 - Magnus Hagdorn ([@mhagdorn](https://github.com/mhagdorn)) - Scientific Computing HPC Team
 - Andreas Reppas ([@areppas](https://github.com/areppas)) - Scientific Computing HPC Team
 
-Special thanks to the SC HPC Team for their support and guidance. If you wish to contribute to this config:
+WS thanks the SC HPC Team for their support and guidance in creating this config. If you wish to contribute:
 1. Contact sc-hpc-helpdesk@charite.de to discuss your suggestions
-2. Fork [ScientificComputingCharite/configs](https://github.com/ScientificComputingCharite/configs) and make commit your changes there
-3. Create a PR from your fork to [ScientificComputingCharite/configs](https://github.com/ScientificComputingCharite/configs)
-4. Contact sc-hpc-helpdesk@charite.de for review
-4. If approved, the SC HPC Team will make a PR to [nf-core/configs](https://github.com/nf-core/configs)
+2. Fork [nf-core/configs](https://github.com/nf-core/configs) and commit your changes there
+3. Get in touch with sc-hpc-helpdesk@charite.de for review once you've tested functionality with your changes
+4. Add yourself to the list of contributors
+5. Create a PR from your fork to [[nf-core/configs](https://github.com/nf-core/configs)
 
 ## Running nf-core pipelines on the Charité HPC
 
-The Conda environment `nextflow` is provided by the SC HPC Team (>=26.04), which you can readily use. Do NOT launch Nextflow on frontend nodes. The memory on the frontends is restricted to **1 GB** per user. Your session will get killed (see [Frontend Memory Restrictions](https://git.bihealth.org/charite-sc-public/sc-wiki/-/wikis/faq/frontend-restrictions)). You have 2 options to run Nextflow:
+The Conda environment `nextflow` is provided by the SC HPC Team (>=26.04), which you can readily use. Do NOT launch Nextflow on frontend nodes. The memory on the frontends is restricted to **1 GB** per user. Your session will get killed (see [Frontend Memory Restrictions](https://git.bihealth.org/charite-sc-public/sc-wiki/-/wikis/faq/frontend-restrictions)). Additionally, Apptainer is not installed on frontend nodes, which will result in using the config to fail. You have 2 options to run Nextflow:
 
 ### Interactive Session
 
-From the frontend terminal, run the following:
+Log into a frontend node via your terminal as you normally would (see [Access](https://git.bihealth.org/charite-sc-public/sc-wiki/-/wikis/Resources/User-Documentation/User-Guide:-HPC-@Charite#access)), then run the following:
 
 ```bash
 srun --job-name=run-nxf-pipeline --partition=compute --ntasks=1 --cpus-per-task=4 --mem=16G --time=12:00:00 --pty bash
@@ -71,8 +73,11 @@ nextflow run nf-core/<pipeline> \
     -resume \ # optional: resume an interrupted workflow
     -profile charite \
     -params-file my-pipeline-params.yaml
+```
 
-# Content of my-pipeline-params:
+`my-pipeline-params.yaml`
+
+```yaml
 input: ./samplesheet.csv
 outdir: ./results
 ```
@@ -110,7 +115,7 @@ Users of the Charité HPC are recommended to make use of an assigned project's s
 
 ### Apptainer-specific Variables
 
-The current profile is configured for **Apptainer**. No module needs to be loaded. The profile enables Apptainer automatically.
+> Another reason this profile does not work on frontend nodes is that Apptainer is only installed on compute nodes.
 
 ```bash
 # Control where Apptainer stores cached data and temporary working files
@@ -121,27 +126,30 @@ export APPTAINER_TMPDIR="${PROJ_SCRATCHDIR_CHARITE_USER}/.apptainer/tmp"
 mkdir -p "${APPTAINER_TMPDIR}" # otherwise Nextflow launch fails
 ```
 
-The location where Apptainer will save the built images (*.sif) is controlled by `apptainer.cacheDir` and `NXF_APPTAINER_CACHEDIR`.
+`NXF_APPTAINER_CACHEDIR` (Nextflow equivalent: `apptainer.cacheDir`) determines where Apptainer will save the built images (`*.sif`). The config here dynamically assigns this path a value, depending on if the user chooses to override the default by setting `NXF_APPTAINER_CACHEDIR`
 
 ```nextflow
 apptainer {
-    ...
+    // ...
     cacheDir    = System.getenv('NXF_APPTAINER_CACHEDIR') ? System.getenv('NXF_APPTAINER_CACHEDIR') :
                                                             "${params.proj_scratchdir_charite_user}/apptainer-images"
+    // ...
 }
 ```
 
-**Has ${NXF_APPTAINER_CACHEDIR} been defined as an environment variable by the user?**
+**Has `${NXF_APPTAINER_CACHEDIR}` been defined as an environment variable by the user?**
 
-&rarr;  No: default to ${PROJ_SCRATCHDIR_CHARITE_USER}/apptainer-images &rarr; your folder structure should look like this:
+&rarr;  No: default to `${PROJ_SCRATCHDIR_CHARITE_USER}/apptainer-images` &rarr; your folder structure should eventually look like this:
 
 ```
 /sc-scratch/sc-scratch-${PROJ_ABBR}/${USER}/
 ├── .apptainer
+│   ├── cache
+│   └── tmp
 └── apptainer-images
 ```
 
-&rarr; Yes: setting ${NXF_APPTAINER_CACHEDIR} overrides the default path assignment.
+&rarr; Yes: setting `${NXF_APPTAINER_CACHEDIR}` overrides the default path assignment.
 
 **How is this useful?** You may set this to a custom path where you are already storing Apptainer images. Another possibility is to store built at a centralized path accessible to all collaborators of a project, if agreed upon by all. This then allows reuse of images between users and keeps unnecessary redownloading of images to the project scratch to a minimum. You can achieve this by executing:
 
@@ -154,6 +162,8 @@ export NXF_APPTAINER_CACHEDIR="${PROJ_SCRATCHDIR_CHARITE}/apptainer-images"
 ```
 /sc-scratch/sc-scratch-${PROJ_ABBR}/${USER}/
 └── .apptainer
+    ├── cache
+    └── tmp
 
 
 /sc-scratch/sc-scratch-${PROJ_ABBR}/ # or another custom path
