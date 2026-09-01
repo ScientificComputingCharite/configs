@@ -23,7 +23,7 @@ WS thanks the SC HPC Team for their support and guidance in creating this config
 2. Fork [nf-core/configs](https://github.com/nf-core/configs) and commit your changes there
 3. Get in touch with sc-hpc-helpdesk@charite.de for review once you've tested functionality with your changes
 4. Add yourself to the list of contributors
-5. Create a PR from your fork to [[nf-core/configs](https://github.com/nf-core/configs)
+5. Create a PR to officially merge your changes
 
 ## Running nf-core pipelines on the Charité HPC
 
