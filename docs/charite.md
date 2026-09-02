@@ -39,7 +39,7 @@ srun --job-name=run-nxf-pipeline --partition=compute --ntasks=1 --cpus-per-task=
 Followed by:
 
 ```
-conda activate nextflow
+conda activate nextflow-26.04.6
 cd /path/to/your/workspace
 nextflow run nf-core/<pipeline> \
     -profile charite \
@@ -65,7 +65,7 @@ Save the following script under `run-nxf-pipeline.sh` and submit it with `sbatch
 
 set -euo pipefail
 source "${HOME}/.bashrc" # Activates conda: required to activate nextflow
-conda activate nextflow
+conda activate nextflow-26.04.6
 
 ### Export variables here ###
 
