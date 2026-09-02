@@ -116,7 +116,7 @@ The code snippets may be:
 >
 > if [ -z "${PROJ_SCRATCHDIR_CHARITE_USER:-}" ]; then # Fail-safe mechanism, since profile relies on this variable
 >     echo "[ERROR] Variable PROJ_SCRATCHDIR_CHARITE_USER has not been set. Shutting down..."
-> exit 1
+>     exit 1
 > fi
 > 
 > # Apptainer-specific Variables
