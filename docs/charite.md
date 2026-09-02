@@ -64,9 +64,10 @@ Save the following script under `run-nxf-pipeline.sh` and submit it with `sbatch
 
 # Adjust resources above as needed
 
-set -euo pipefail
-source "${HOME}/.bashrc" # Activates conda: required to activate nextflow
+set +e
+source /etc/profile.d/conda.sh # Activates conda: required to activate nextflow
 conda activate nextflow-26.04.6
+set -e
 
 ### Export variables here ###
 
