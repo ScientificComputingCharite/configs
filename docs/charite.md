@@ -27,7 +27,7 @@ WS thanks the SC HPC Team for their support and guidance in creating this profil
 
 The Conda environment `nextflow-26.04.6` is provided by the SC HPC Team, which you can readily use.  You have 2 options:
 
-### 3.1. Interactive Session
+### Option 1: Interactive Session
 
 Log into a frontend node via your terminal as you normally would (see [Access](https://git.bihealth.org/charite-sc-public/sc-wiki/-/wikis/Resources/User-Documentation/User-Guide:-HPC-@Charite#access)), then run the following:
 
@@ -49,7 +49,7 @@ nextflow run nf-core/<pipeline> \
 
 It is also possible to jump right into an interactive session using the [Open OnDemand Portal](https://s-sc-ood.charite.de/pun/sys/dashboard/batch_connect/sessions) ([Open OnDemand Wiki](https://git.bihealth.org/charite-sc-public/sc-wiki/-/wikis/Resources/User-Documentation/User-Guide:-HPC-@Charite#open-ondemand)). You must be connected the Charité network to use this, either via Ethernet cable or [OpenVPN Connect](https://git.bihealth.org/charite-sc-public/sc-wiki/-/wikis/Resources/User-Documentation/User-Guide:-HPC-@Charite#connection-to-the-cluster-from-outside-the-charite-network-over-vpn).
 
-### 3.2. Batch Script
+### Option 2: Batch Script
 
 Save the following script under `run-nxf-pipeline.sh` and submit it with `sbatch run-nxf-pipeline.sh`:
 
