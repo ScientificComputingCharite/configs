@@ -54,7 +54,6 @@ It is also possible to jump right into an interactive session using the [Open On
 Save the following script under `run-nxf-pipeline.sh` and submit it with `sbatch run-nxf-pipeline.sh`:
 
 ```bash
-# Adjust resources as needed
 #!/usr/bin/env bash
 #SBATCH --job-name=run-nxf-pipeline
 #SBATCH --partition=compute
@@ -62,6 +61,8 @@ Save the following script under `run-nxf-pipeline.sh` and submit it with `sbatch
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=16G
 #SBATCH --time=12:00:00
+
+# Adjust resources above as needed
 
 set -euo pipefail
 source "${HOME}/.bashrc" # Activates conda: required to activate nextflow
