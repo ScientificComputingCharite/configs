@@ -121,8 +121,9 @@ The code snippets may be:
 > export APPTAINER_CACHEDIR="${PROJ_SCRATCHDIR_CHARITE_USER}/.apptainer"
 > export APPTAINER_TMPDIR="${PROJ_SCRATCHDIR_CHARITE_USER}/.apptainer/tmp"
 > mkdir -p "${APPTAINER_TMPDIR}" # otherwise Nextflow launch fails
+> # Optional: uncomment the line below if you wish to override the default profile path where Apptainer images will be stored
+> # Example path provided assigns a shared location for all collaborators of a project. Change as needed
 > # export NXF_APPTAINER_CACHEDIR="${PROJ_SCRATCHDIR_CHARITE}/apptainer-images"
-> # Optional: uncomment line above if you wish to override default path where Apptainer images will be stored
 > 
 > # Nextflow-specific Variables
 > # According to nf-core: "In some cases, the Nextflow Java virtual machines can start to request a large amount of memory.
