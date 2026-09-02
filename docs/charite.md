@@ -105,10 +105,8 @@ The code snippets may be:
 > 
 > ```bash
 > # Global Utility Variables
-> # export PROJ_ABBR=""
-> # Uncomment the line above only if you have an assigned project, and add the initials of your project
-> # Leave it commented if you have no assigned project
-> if [ -z "${PROJ_ABBR}" ]; then
+> export PROJ_ABBR="" # Add the abbreviation of your project here if you have one
+> if [ -z "${PROJ_ABBR:-}" ]; then
 >     export PROJ_SCRATCHDIR_CHARITE_USER="${HOME}"
 > else
 >     export PROJ_SCRATCHDIR_CHARITE="/sc-scratch/sc-scratch-${PROJ_ABBR}"
@@ -144,10 +142,8 @@ The code snippets may be:
 ### 4.1. Global Utility Variables
 
 ```bash
-# export PROJ_ABBR=""
-# Uncomment the line above only if you have an assigned project, and add the initials of your project
-# Leave it commented if you have no assigned project
-if [ -z "${PROJ_ABBR}" ]; then
+export PROJ_ABBR="" # Add the abbreviation of your project here if you have one
+if [ -z "${PROJ_ABBR:-}" ]; then
     export PROJ_SCRATCHDIR_CHARITE_USER="${HOME}"
 else
     export PROJ_SCRATCHDIR_CHARITE="/sc-scratch/sc-scratch-${PROJ_ABBR}"
