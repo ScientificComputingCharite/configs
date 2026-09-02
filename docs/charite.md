@@ -260,6 +260,9 @@ Your folder structure should now look like this:
 
 ## 5. Job Assignment Logic, Resource Allocation, GPU Acceleration
 
+Jobs will get assigned `--partition=compute` with `--qos=normal` by default. You do not need to assign resource values yoursefl to any of the tools used in pipelines; nf-core takes care of that. Tools are tagged with labels such as `process_single`, `process_high`, `process_high_memory`. Depending on the label, jobs get assigned corresponding resources. If they are insufficient, the job will be given more resources on the next attempt (`maxRetries = 5`). See [`nf-core/rnaseq`'s `base.config`](https://github.com/nf-core/rnaseq/blob/master/conf/base.config) as an example.
+
+Some tools can benefit from Nvidia GPU acceleration (`process_gpu` label). There are 2 GPU queues available on the HPC. If a task strictly needs more than 1 GPU, it will get allocated to `pgpu`, otherwise it will get allocated to `gpu`.
 
 ## 6. Additional Profiles
 
@@ -279,7 +282,7 @@ You can also run a pipeline with test data provided by nf-core like this:
 
 ```bash
 nextflow run nf-core/demo -profile charite,test --outdir test-demo
-nextflow run nf-core/rnaseq -profile charite,<profile>,test --outdir test-rnaseq
+nextflow run nf-core/rnaseq -profile charite,test --outdir test-rnaseq
 ```
 
 > [!IMPORTANT]
