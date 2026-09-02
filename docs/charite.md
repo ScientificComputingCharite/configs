@@ -33,7 +33,7 @@ Log into a frontend node via your terminal as you normally would (see [Access](h
 
 ```bash
 # Adjust resources as needed
-srun --job-name=run-nxf-pipeline --partition=compute --ntasks=1 --cpus-per-task=4 --mem=16G --time=12:00:00 --pty bash
+srun --job-name=run-nxf-pipeline --partition=compute --ntasks=1 --cpus-per-task=4 --mem=16G --time=08:00:00 --pty bash
 ```
 
 Followed by:
