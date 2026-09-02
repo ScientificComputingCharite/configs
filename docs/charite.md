@@ -113,6 +113,11 @@ The code snippets may be:
 >     export PROJ_SCRATCHDIR_CHARITE="/sc-scratch/sc-scratch-${PROJ_ABBR}"
 >     export PROJ_SCRATCHDIR_CHARITE_USER="${PROJ_SCRATCHDIR_CHARITE}/${USER}"
 > fi
+>
+> if [ -z "${PROJ_SCRATCHDIR_CHARITE_USER:-}" ]; then # Fail-safe mechanism, since profile relies on this variable
+>     echo "[ERROR] Variable PROJ_SCRATCHDIR_CHARITE_USER has not been set. Shutting down..."
+> exit 1
+> fi
 > 
 > # Apptainer-specific Variables
 > # Control where Apptainer stores cached data and temporary working files
@@ -149,6 +154,11 @@ if [ -z "${PROJ_ABBR:-}" ]; then
 else
     export PROJ_SCRATCHDIR_CHARITE="/sc-scratch/sc-scratch-${PROJ_ABBR}"
     export PROJ_SCRATCHDIR_CHARITE_USER="${PROJ_SCRATCHDIR_CHARITE}/${USER}"
+fi
+
+if [ -z "${PROJ_SCRATCHDIR_CHARITE_USER:-}" ]; then # Fail-safe mechanism, since profile relies on this variable
+  echo "[ERROR] Variable PROJ_SCRATCHDIR_CHARITE_USER has not been set. Shutting down..."
+  exit 1
 fi
 ```
 
