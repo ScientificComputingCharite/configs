@@ -269,11 +269,12 @@ export NXF_SYNTAX_PARSER=v1
 
 # Do the work
 nextflow run nf-core/demo \
-    -profile charite,test \
+    -profile charite \
     --outdir demo-test
 
-    # -r <version> \ # Optional: pin a specific version of the pipeline
+    # -r <version> \ # Optional: pin a specific revision of a pipeline
     # -resume \ # Optional: resume an interrupted workflow
+    # -c custom-params.config \ # Optional: add an extra config file which contains additional user-defined parameters
 ```
 
 ## 5. Job Assignment Logic, Resource Allocation, GPU Acceleration
