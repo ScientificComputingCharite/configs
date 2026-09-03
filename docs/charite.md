@@ -6,13 +6,7 @@ This page documents the `charite` Nextflow profile for running Nextflow and nf-c
 
 This profile uses **Slurm** and **Apptainer**.
 
-## 1. Requesting Access / Onboarding
-
-The Charité internal user documentation/wiki requires a Charité GitLab account. To request access:
-1. Email sc-hpc-helpdesk@charite.de to request access to the Charité HPC. This initiates the onboarding process.
-2. If you do not have access to git.bihealth.org, contact health-data@charite.de to request GitLab access for the [Charité HPC User Documentation and Onboarding Guide](https://git.bihealth.org/charite-sc-public/sc-wiki/-/wikis/home).
-
-## 2. Contributors and Acknowledgments
+### Contributors and Acknowledgments
 
 - Wassim Salam ([@wassimsalam01](https://github.com/wassimsalam01)) - BIH/MDC Genomics Platform Data Management Team
 - Magnus Hagdorn ([@mhagdorn](https://github.com/mhagdorn)) - Scientific Computing HPC Team
@@ -20,7 +14,13 @@ The Charité internal user documentation/wiki requires a Charité GitLab account
 
 WS thanks the SC HPC Team for their support and guidance in creating this profile.
 
-## 3. Running nf-core pipelines on the Charité HPC
+## 1. Requesting Access / Onboarding
+
+The Charité internal user documentation/wiki requires a Charité GitLab account. To request access:
+1. Email sc-hpc-helpdesk@charite.de to request access to the Charité HPC. This initiates the onboarding process.
+2. If you do not have access to git.bihealth.org, contact health-data@charite.de to request GitLab access for the [Charité HPC User Documentation and Onboarding Guide](https://git.bihealth.org/charite-sc-public/sc-wiki/-/wikis/home).
+
+## 2. Running nf-core pipelines on the Charité HPC
 
 > [!CAUTION]
 > Do not attempt to launch Nextflow on frontend nodes. The memory on the frontends is restricted to **1 GB** per user. Your session will get killed (see [Frontend Memory Restrictions](https://git.bihealth.org/charite-sc-public/sc-wiki/-/wikis/faq/frontend-restrictions)). Additionally, Apptainer is not installed on frontend nodes, which will result in using the profile to fail immediately.
@@ -86,7 +86,7 @@ input: ./samplesheet.csv
 outdir: ./results
 ```
 
-## 4. Environment Variables Setup
+## 3. Environment Variables Setup
 
 In order for the profile to run as intended, the following variables must first be exported before running any workflow.
 
@@ -145,7 +145,7 @@ The code snippets may be:
 > 
 > </details>
 
-### 4.1. Global Utility Variables
+### 3.1. Global Utility Variables
 
 ```bash
 export PROJ_ABBR="" # Add the abbreviation of your project here if you have one
@@ -170,7 +170,7 @@ Users of the Charité HPC are recommended to make use of an assigned project's s
 > **You are already a group admin and want to add your collaborator to a project?** See here for more info on [how to manage project and scratch directories
 ](https://git.bihealth.org/charite-sc-public/sc-wiki/-/wikis/Resources/HOWTOs/how-to-manage-project-and-scratch-directories).
 
-### 4.2. Apptainer-specific Variables
+### 3.2. Apptainer-specific Variables
 
 Apptainer requires no module loading, as it is readily available on compute nodes.
 
@@ -227,7 +227,7 @@ export NXF_APPTAINER_CACHEDIR="${PROJ_SCRATCHDIR_CHARITE}/apptainer-images"
 └── apptainer-images
 ```
 
-### 4.3. Nextflow-specific Variables
+### 3.3. Nextflow-specific Variables
 
 ```bash
 # Nextflow-specific Variables
@@ -266,13 +266,13 @@ Your folder structure should now look like this:
 > This should be removed once the pipelines you are using becomes compatible with the v2 parser.
 > You can read up more about strict syntax [here](https://docs.seqera.io/nextflow/strict-syntax).
 
-## 5. Job Assignment Logic, Resource Allocation, GPU Acceleration
+## 4. Job Assignment Logic, Resource Allocation, GPU Acceleration
 
 Jobs will get assigned `--partition=compute` with `--qos=normal` by default. You do not need to assign resource values yoursefl to any of the tools used in pipelines; nf-core takes care of that. Tools are tagged with labels such as `process_single`, `process_high`, `process_high_memory`. Depending on the label, jobs get assigned corresponding resources. If they are insufficient, the job will be given more resources on the next attempt (`maxRetries = 5`). See [`nf-core/rnaseq`'s `base.config`](https://github.com/nf-core/rnaseq/blob/master/conf/base.config) as an example.
 
 Some tools can benefit from Nvidia GPU acceleration (`process_gpu` label). There are 2 GPU queues available on the HPC. If a task strictly needs more than 1 GPU, it will get allocated to `pgpu`, otherwise it will get allocated to `gpu`.
 
-## 6. Additional Profiles
+## 5. Additional Profiles
 
 The config offers additional profiles, which users can use to run their analyses. Each profile has a dedicated partition with corresponding resource limits. If you are having trouble accessing a partition you should have access to, get in touch with sc-hpc-helpdesk@charite.de.
 
