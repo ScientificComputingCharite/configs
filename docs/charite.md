@@ -133,7 +133,7 @@ The code snippets may be:
 > # Nextflow-specific Variables
 > # According to nf-core: "In some cases, the Nextflow Java virtual machines can start to request a large amount of memory.
 > # We recommend adding the following line to your environment to limit this"
-> export NXF_OPTS='-Xms1g -Xmx4g'
+> export NXF_OPTS="-Xms1g -Xmx4g"
 > # Centralize Nextflow cache and Home into one directory
 > export NXF_HOME="${PROJ_SCRATCHDIR_CHARITE_USER}/.nextflow"
 > export NXF_CACHE_DIR="${NXF_HOME}"
@@ -188,7 +188,7 @@ mkdir -p "${APPTAINER_TMPDIR}" # otherwise Nextflow launch fails
 ```nextflow
 apptainer {
     // ...
-    cacheDir    = System.getenv('NXF_APPTAINER_CACHEDIR') ? System.getenv('NXF_APPTAINER_CACHEDIR') :
+    cacheDir    = System.getenv("NXF_APPTAINER_CACHEDIR") ? System.getenv("NXF_APPTAINER_CACHEDIR") :
                                                             "${params.proj_scratchdir_charite_user}/apptainer-images"
     // ...
 }
@@ -234,7 +234,7 @@ export NXF_APPTAINER_CACHEDIR="${PROJ_SCRATCHDIR_CHARITE}/apptainer-images"
 # According to nf-core:
 # "In some cases, the Nextflow Java virtual machines can start to request a large amount of memory.
 # We recommend adding the following line to your environment to limit this."
-export NXF_OPTS='-Xms1g -Xmx4g'
+export NXF_OPTS="-Xms1g -Xmx4g"
 # Centralize Nextflow cache and home into one directory
 export NXF_HOME="${PROJ_SCRATCHDIR_CHARITE_USER}/.nextflow"
 export NXF_CACHE_DIR="${NXF_HOME}"
