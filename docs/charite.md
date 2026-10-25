@@ -8,11 +8,18 @@ This profile uses **Slurm** as its job scheduler and **Apptainer** as its contai
 
 ### Contributors and Acknowledgments
 
-- Wassim Salam ([@wassimsalam01](https://github.com/wassimsalam01)) - BIH/MDC Genomics Platform Data Management Team
-- Magnus Hagdorn ([@mhagdorn](https://github.com/mhagdorn)) - Scientific Computing HPC Team
-- Andreas Reppas ([@areppas](https://github.com/areppas)) - Scientific Computing HPC Team
+- Developer: Wassim Salam ([@wassimsalam01](https://github.com/wassimsalam01)) - BIH/MDC Genomics Platform Data Management Team
+- Maintainer: Scientific Computing HPC Team ([@ScientificComputingCharite](https://github.com/ScientificComputingCharite))
 
-WS thanks the SC HPC Team for their support and guidance in creating this profile.
+WS thanks the following individuals for their support and guidance in developing this configuration:
+
+- Scientific Computing HPC Team:
+    - Magnus Hagdorn ([@mhagdorn](https://github.com/mhagdorn))
+    - Andreas Reppas ([@areppas](https://github.com/areppas))
+- BIH/MDC Genomics Platform Data Management Team
+    - Marten Jäger ([@martenj](https://github.com/martenj))
+    - Cornelius Fischer ([@cofischer](https://github.com/))
+    - Namuun Battur ([@NmnBttr](https://github.com/NmnBttr))
 
 ## Table of Contents
 
