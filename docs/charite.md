@@ -2,7 +2,7 @@
 
 This page documents the `charite` Nextflow profile for running Nextflow and nf-core pipelines on the Charité HPC. See the full configuration at [`conf/charite.config`](../conf/charite.config). For general HPC information, see [Charité Science IT](https://www.charite.de/en/research/research_support_services/research_infrastructure/science_it/).
 
-> Contact: Scientific Computing, GB IT, Charité — sc-hpc-helpdesk@charite.de
+> Official Contact: Scientific Computing, GB IT, Charité — sc-hpc-helpdesk@charite.de
 
 This profile uses **Slurm** as its job scheduler and **Apptainer** as its container engine.
 
@@ -11,12 +11,12 @@ This profile uses **Slurm** as its job scheduler and **Apptainer** as its contai
 - Developer: Wassim Salam ([@wassimsalam01](https://github.com/wassimsalam01)) - BIH/MDC Genomics Platform Data Management Team
 - Maintainer: Scientific Computing HPC Team ([@ScientificComputingCharite](https://github.com/ScientificComputingCharite))
 
-WS thanks the following individuals for their support and guidance in developing this configuration:
+WS thanks the following individuals from the [@ScientificComputingCharite](https://github.com/ScientificComputingCharite) and the [@BIH-MDC-Genomics-Platform](https://github.com/BIH-MDC-Genomics-Platform) for their support and guidance in developing this configuration:
 
-- Scientific Computing HPC Team:
+- Scientific Computing HPC Team
     - Magnus Hagdorn ([@mhagdorn](https://github.com/mhagdorn))
     - Andreas Reppas ([@areppas](https://github.com/areppas))
-- BIH/MDC Genomics Platform Data Management Team
+- BIH/MDC Genomics Platform Data Management Team 
     - Marten Jäger ([@martenj](https://github.com/martenj))
     - Cornelius Fischer ([@cofischer](https://github.com/))
     - Namuun Battur ([@NmnBttr](https://github.com/NmnBttr))
