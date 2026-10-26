@@ -11,7 +11,7 @@ This profile uses **Slurm** as its job scheduler and **Apptainer** as its contai
 - Developer: Wassim Salam ([@wassimsalam01](https://github.com/wassimsalam01)) - BIH/MDC Genomics Platform Data Management Team
 - Maintainer: Scientific Computing HPC Team ([@ScientificComputingCharite](https://github.com/ScientificComputingCharite))
 
-WS thanks the following individuals from the [@ScientificComputingCharite](https://github.com/ScientificComputingCharite) and the [@BIH-MDC-Genomics-Platform](https://github.com/BIH-MDC-Genomics-Platform) for their support and guidance in developing this configuration:
+WS thanks the following individuals for their support and guidance in developing the profile:
 
 - Scientific Computing HPC Team
     - Magnus Hagdorn ([@mhagdorn](https://github.com/mhagdorn))
