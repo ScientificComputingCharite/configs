@@ -16,9 +16,9 @@ WS thanks the following individuals for their support and guidance in developing
 - Scientific Computing HPC Team
     - Magnus Hagdorn ([@mhagdorn](https://github.com/mhagdorn))
     - Andreas Reppas ([@areppas](https://github.com/areppas))
-- BIH/MDC Genomics Platform Data Management Team 
+- BIH/MDC Genomics Platform Data Management Team
     - Marten Jäger ([@martenj](https://github.com/martenj))
-    - Cornelius Fischer ([@cofischer](https://github.com/))
+    - Cornelius Fischer ([@cofischer](https://github.com/cofischer))
     - Namuun Battur ([@NmnBttr](https://github.com/NmnBttr))
 
 ## Table of Contents
@@ -251,7 +251,7 @@ if [ -z "${PROJ_SCRATCHDIR_CHARITE_USER:-}" ]; then # Fail-safe mechanism, since
     echo "[ERROR] Variable PROJ_SCRATCHDIR_CHARITE_USER has not been set. Shutting down..."
     exit 1
 fi
- 
+
 # 2. Apptainer-specific Variables
 # Control where Apptainer stores cached data and temporary working files
 export APPTAINER_CACHEDIR="${PROJ_SCRATCHDIR_CHARITE_USER}/.apptainer"
