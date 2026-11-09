@@ -325,7 +325,7 @@ nextflow run nf-core/demo \
 flowchart TB
     A(["Process / Job"])
     Q["'normal' QOS"]
-    B{"'process_gpu' label?"}
+    B{"'process_gpu'?"}
 
     A --> Q --> B
 
