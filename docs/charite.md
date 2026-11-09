@@ -80,9 +80,8 @@ The Charité internal user documentation/wiki requires a Charité GitLab account
 
 > [!NOTE]
 > In order for the config to work as intended, some variables must first be exported into the environment before running any workflow. This section provides a detailed overview of those variables.
-
-> [!NOTE]
-> A complete practical example is provided in the next section, which integrates the exporting of the variables explained here with an actual run of a nf-core pipeline. [Click here to jump to 'Running Nextflow Workflows on the Charité HPC'](#running-nextflow-workflows-on-the-charité-hpc)
+>
+> A complete practical example is provided in the next section, which integrates the exporting of the variables explained here with an actual run of a nf-core pipeline. [Click here to skip ahead to 'Running Nextflow Workflows on the Charité HPC'](#running-nextflow-workflows-on-the-charité-hpc)
 
 ### Redirecting Output to Scratch
 
@@ -179,13 +178,13 @@ export NXF_APPTAINER_CACHEDIR="${PROJ_SCRATCHDIR_CHARITE}/apptainer-images"
 
 ```bash
 # Nextflow-specific Variables
+# Centralize Nextflow cache and home into one directory
+export NXF_HOME="${PROJ_SCRATCHDIR_CHARITE_USER}/.nextflow"
+export NXF_CACHE_DIR="${NXF_HOME}"
 # According to nf-core:
 # "In some cases, the Nextflow Java virtual machines can start to request a large amount of memory.
 # We recommend adding the following line to your environment to limit this."
 export NXF_OPTS="-Xms1g -Xmx4g"
-# Centralize Nextflow cache and home into one directory
-export NXF_HOME="${PROJ_SCRATCHDIR_CHARITE_USER}/.nextflow"
-export NXF_CACHE_DIR="${NXF_HOME}"
 ```
 
 Your folder structure should now look like this:
@@ -203,7 +202,6 @@ Your folder structure should now look like this:
 ### Nextflow Strict Syntax
 
 > [!IMPORTANT]
-> **Temporary Nextflow / nf-core compatibility workaround**
 >
 > Nextflow **v26.04** and higher made the **v2 syntax parser** the default as part of the major transition toward strict syntax. However, not all nf-core pipelines have completed this migration yet, and some pipelines can currently fail when parsed with `NXF_SYNTAX_PARSER=v2`. The nf-core training documentation likewise notes that many nf-core pipelines do not yet support the v2 parser.
 >
@@ -226,32 +224,84 @@ The Conda environment `nf-core-2026-1` is provided by the SC HPC Team, which you
 conda activate nf-core-2026-1
 ```
 
-
-
-
-The code snippets may be:
-
-1. Copy-pasted into the terminal (e.g. if working in an interactive session). With this method, you must set the variables again every time you start a new session
-2. Added to your Batch script
-3. Added to your `~/.bashrc` file. After doing so, run `source ~/.bashrc` or start a new session, in order for the variables to be exported. You then no longer need to export them every time
-
-> [!WARNING]
-> Be mindful of what you add into your `~/.bashrc` file, as it may unexpectedly alter the desired behavior of other programs.
-
+### Option 1: Interactive Session
 
 > [!CAUTION]
-> Do not attempt to start resource-heavy jobs on frontend nodes. The memory on the frontends is restricted to **1 GB** per user. Your session will get killed (see [Frontend Memory Restrictions](https://git.bihealth.org/charite-sc-public/sc-wiki/-/wikis/faq/frontend-restrictions)).
+> Do not attempt to start resource-heavy jobs on frontend nodes. The memory on the frontends is restricted to **1 GB** per user. Your session will get killed (see [Frontend Memory Restrictions](https://git.bihealth.org/charite-sc-public/sc-wiki/-/wikis/faq/frontend-restrictions)). It is therefore recommended to work in an interactive session.
 
-First, `ssh` into a frontend node via your terminal as you normally would (see [Access](https://git.bihealth.org/charite-sc-public/sc-wiki/-/wikis/Resources/User-Documentation/User-Guide:-HPC-@Charite#access)). You then have 2 options:
-
-### Option 1: Interactive Session
+#### srun
 
 ```bash
 # Interactive sessions launched with srun are capped at 8 hours runtime
 srun --job-name=run-nf-core --partition=compute --ntasks=1 --cpus-per-task=4 --mem=16G --time=08:00:00 --pty bash
 ```
 
+#### Open OnDemand Portal
+
 It is also possible to jump right into an interactive session using the [Open OnDemand Portal](https://s-sc-ood.charite.de/pun/sys/dashboard/batch_connect/sessions) ([Open OnDemand Wiki](https://git.bihealth.org/charite-sc-public/sc-wiki/-/wikis/Resources/User-Documentation/User-Guide:-HPC-@Charite#open-ondemand)). You must be connected the Charité network to use this, either via Ethernet cable or [OpenVPN Connect](https://git.bihealth.org/charite-sc-public/sc-wiki/-/wikis/Resources/User-Documentation/User-Guide:-HPC-@Charite#connection-to-the-cluster-from-outside-the-charite-network-over-vpn).
+
+<details closed>
+<summary>Click here to reveal the variables code snippet for easy copy-pasting</summary>
+
+```bash
+# 1. Global Utility Variables
+export PROJ_ABBR="" # Add the abbreviation of your project here if you have one
+if [ -z "${PROJ_ABBR:-}" ]; then
+    export PROJ_SCRATCHDIR_CHARITE_USER="${HOME}"
+else
+    export PROJ_SCRATCHDIR_CHARITE="/sc-scratch/sc-scratch-${PROJ_ABBR}"
+    export PROJ_SCRATCHDIR_CHARITE_USER="${PROJ_SCRATCHDIR_CHARITE}/${USER}"
+fi
+
+if [ -z "${PROJ_SCRATCHDIR_CHARITE_USER:-}" ]; then # Fail-safe mechanism, since profile relies on this variable
+    echo "[ERROR] Variable PROJ_SCRATCHDIR_CHARITE_USER has not been set. Shutting down..."
+    exit 1
+fi
+
+# 2. Apptainer-specific Variables
+# Control where Apptainer stores cached data and temporary working files
+export APPTAINER_CACHEDIR="${PROJ_SCRATCHDIR_CHARITE_USER}/.apptainer"
+export APPTAINER_TMPDIR="${PROJ_SCRATCHDIR_CHARITE_USER}/.apptainer/tmp"
+mkdir -p "${APPTAINER_TMPDIR}" # otherwise Nextflow launch fails
+
+# Optional: uncomment the line below if you wish to override the default profile path where Apptainer images will be stored
+# Example path provided assigns a shared location for all collaborators of a project. Change as needed
+# export NXF_APPTAINER_CACHEDIR="${PROJ_SCRATCHDIR_CHARITE}/apptainer-images"
+
+# 3. Nextflow-specific Variables
+# Recommendation by nf-core
+export NXF_OPTS="-Xms1g -Xmx4g"
+# Centralize Nextflow cache and Home into one directory
+export NXF_HOME="${PROJ_SCRATCHDIR_CHARITE_USER}/.nextflow"
+export NXF_CACHE_DIR="${NXF_HOME}"
+
+# Temporary workaround for Nextflow strict syntax
+# Add the line below, so long as the pipeline you are using is not compatible with NXF_SYNTAX_PARSER=v2 (default in Nextflow >=26.04)
+# This must eventually be removed!
+export NXF_SYNTAX_PARSER=v1
+
+# Define your workspace directory // Adjust as needed
+MY_NXF_WORKSPACE="${PROJ_SCRATCHDIR_CHARITE}/my-nxf-workspace"
+cd ${MY_NFCORE_WORKSPACE}
+```
+
+</details>
+
+The above variables code snippet may be:
+
+1. Copy-pasted into the terminal. With this method, you must set the variables again every time you start a new session.
+2. Copy-pasted into your `~/.bashrc` file. After doing so, you must run `source ~/.bashrc` or start a new session, in order for the variables to be exported. Using this method, you no longer need to export them every time.
+
+> [!WARNING]
+> Be mindful of what you add into your `~/.bashrc` file, as it may unexpectedly alter the desired behavior of other programs.
+
+
+
+
+First, `ssh` into a frontend node via your terminal as you normally would (see [Access](https://git.bihealth.org/charite-sc-public/sc-wiki/-/wikis/Resources/User-Documentation/User-Guide:-HPC-@Charite#access)). You then have 2 options:
+
+
+
 
 ### Option 2: Batch Script
 
@@ -307,6 +357,10 @@ export NXF_CACHE_DIR="${NXF_HOME}"
 # Add the line below, so long as the pipeline you are using is not compatible with NXF_SYNTAX_PARSER=v2 (default in Nextflow >=26.04)
 # This must eventually be removed!
 export NXF_SYNTAX_PARSER=v1
+
+# Define your workspace directory // Adjust as needed
+MY_NXF_WORKSPACE="${PROJ_SCRATCHDIR_CHARITE}/my-nxf-workspace"
+cd ${MY_NFCORE_WORKSPACE}
 
 # Do the work
 nextflow run nf-core/demo \
