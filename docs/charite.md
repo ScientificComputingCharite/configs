@@ -15,7 +15,7 @@ This page documents the `charite` Nextflow profile for running Nextflow and nf-c
   - [Apptainer-specific Variables](#apptainer-specific-variables)
   - [Nextflow-specific Variables](#nextflow-specific-variables)
   - [Nextflow Strict Syntax](#nextflow-strict-syntax)
-- [Running Nextflow Workflows on the Charité HPC](#running-nextflow-workflows-on-the-charite-hpc)
+- [Running Nextflow Workflows on the Charité HPC](#running-nextflow-workflows-on-the-charité-hpc)
   - [Conda Environment](#conda-environment)
   - [Option 1: Interactive Session](#option-1-interactive-session)
   - [Option 2: Batch Script](#option-2-batch-script) 
@@ -82,7 +82,7 @@ The Charité internal user documentation/wiki requires a Charité GitLab account
 > In order for the config to work as intended, some variables must first be exported into the environment before running any workflow. This section provides a detailed overview of those variables.
 
 > [!NOTE]
-> A complete practical example is provided in the next section, which integrates the exporting of the variables explained here with an actual run of a nf-core pipeline. [Click here to jump to 'Running Nextflow Workflows on the Charité HPC'](#running-nextflow-workflows-on-the-charite-hpc)
+> A complete practical example is provided in the next section, which integrates the exporting of the variables explained here with an actual run of a nf-core pipeline. [Click here to jump to 'Running Nextflow Workflows on the Charité HPC'](#running-nextflow-workflows-on-the-charité-hpc)
 
 ### Redirecting Output to Scratch
 
@@ -216,12 +216,6 @@ Your folder structure should now look like this:
 > This should be removed once the pipelines you are using becomes compatible with the v2 parser.
 > You can read up more about strict syntax [here](https://docs.seqera.io/nextflow/strict-syntax).
 
-
-
-
-
-
-
 ## Running Nextflow Workflows on the Charité HPC
 
 ### Conda Environment
@@ -329,9 +323,9 @@ nextflow run nf-core/demo \
 
 ```mermaid
 flowchart TB
-    A(["Nextflow pipeline launched"])
-    Q["Process QOS 'normal'"]
-    B{"Process labeled 'process_gpu?'"}
+    A(["Process / Job"])
+    Q["'normal' QOS"]
+    B{"'process_gpu' label?"}
 
     A --> Q --> B
 
@@ -340,7 +334,7 @@ flowchart TB
 
         subgraph GPU["GPU routing"]
             direction TB
-            C{"Number of GPUs requested?"}
+            C{"# GPUs?"}
             D["gpu"]
             E["pgpu"]
 
@@ -350,7 +344,7 @@ flowchart TB
 
         subgraph CPU["CPU routing"]
             direction TB
-            F{"Selected profile(s)?"}
+            F{"Profile(s)"}
 
             G["compute"]
             H["dragen_cc05"]
@@ -371,7 +365,7 @@ flowchart TB
     B -->|"Yes — any profile"| C
     B -->|"No"| F
 
-    D --> N(["Slurm Scheduler"])
+    D --> N(["SLURM"])
     E --> N
     G --> N
     H --> N
