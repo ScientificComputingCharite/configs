@@ -7,26 +7,27 @@ This page documents the `charite` Nextflow profile for running Nextflow and nf-c
 ## Table of Contents
 
 - [Contributors and Acknowledgments](#contributors-and-acknowledgments)
-- [Overview](#overview)
-- [Requesting Access](#requesting-access)
-- [Running Jobs](#running-jobs)
-  - [Option 1: Interactive Session](#option-1-interactive-session)
-  - [Option 2: Batch Script](#option-2-batch-script) 
+- [Quick Overview and Usage Examples](#quick-overview-and-usage-examples)
+- [Requesting Charité HPC Access](#requesting-hpc-access)
 - [Environment Setup](#environment-setup)
+  - [Redirecting Output to Scratch](#redirecting-output-to-scratch)
   - [Global Utility Variables](#global-utility-variables)
   - [Apptainer-specific Variables](#apptainer-specific-variables)
   - [Nextflow-specific Variables](#nextflow-specific-variables)
-  - [Nextflow Conda Environment](#nextflow-conda-environment)
-- [Running nf-core pipelines](#running-nf-core-pipelines)
+  - [Nextflow Strict Syntax](#nextflow-strict-syntax)
+- [Running Nextflow Workflows on the Charité HPC](#running-nextflow-workflows-on-the-charite-hpc)
+  - [Conda Environment](#conda-environment)
+  - [Option 1: Interactive Session](#option-1-interactive-session)
+  - [Option 2: Batch Script](#option-2-batch-script) 
 - [Job Assignment Logic, Resource Allocation, GPU Acceleration](#job-assignment-logic-resource-allocation-gpu-acceleration)
-- [Additional Profiles](#additional-profiles)
+- [Known Limitations and Issues](#known-limitations-and-issues)
 
 ## Contributors and Acknowledgments
 
 - Developer: Wassim Salam - BIH/MDC Genomics Platform Data Management Team
 - Maintainers: Magnus Hagdorn & Andreas Reppas - Scientific Computing HPC Team
 
-WS ([@wassimsalam01](https://github.com/wassimsalam01)) thanks the following individuals for their support and guidance in developing the profile:
+[@wassimsalam01](https://github.com/wassimsalam01) thanks the following individuals for their support and guidance in developing the profile:
 
 - Scientific Computing HPC Team ([@ScientificComputingCharite](https://github.com/ScientificComputingCharite))
     - Magnus Hagdorn ([@mhagdorn](https://github.com/mhagdorn))
@@ -36,82 +37,70 @@ WS ([@wassimsalam01](https://github.com/wassimsalam01)) thanks the following ind
     - Cornelius Fischer ([@cofischer](https://github.com/cofischer))
     - Namuun Battur ([@NmnBttr](https://github.com/NmnBttr))
 
-## Overview
+## Quick Overview and Usage Examples
 
 - **Scheduler**: SLURM
-- **Default Queue**: `compute`
-- **Default QOS**: `normal`
 - **Container Engine**: Apptainer
+- **Default QOS**: `normal`
+- **Default Queue**: `compute`
 - **Resource Limits of Default Queue**:
   - Maximum CPUs: 192 cores
   - Maximum memory: 1TB
   - Maximum walltime: 2 days
-- **Usage Examples**
- 
-```
-# nf-core Pipeline
-nextflow run nf-core/<pipeline-name> -profile charite ...
+- **GPU Queues**: `gpu`,`pgpu`
+- **Additional Profiles**: `dragen_cc05`,`dragen_cc15`,`dragen_gp`,`highmem`,`genomics`
 
+See [Job Assignment Logic, Resource Allocation, GPU Acceleration](#job-assignment-logic-resource-allocation-gpu-acceleration) for more info.
+
+- **Usage Examples**:
+
+```
 # Your own Nextflow Workflow
 nextflow run main.nf -profile charite ...
 ```
 
-- **Additional Queues**: `dragen_cc05`,`dragen_cc15`,`dragen_gp`,`highmem`,`genomics` (see []() for more info
-- **GPU Queues**: `gpu`,`pgpu` (see []() for more info)
+```
+# nf-core Pipeline
+nextflow run nf-core/<pipeline-name> -profile charite ...
+```
 
-## Requesting Access
+```
+# Test nf-core Demo Pipeline (small-scale workflow)
+# Specifying '-profile test' uses dummy data provided by nf-core for that particular pipeline
+nextflow run nf-core/demo -profile test,charite --outdir results/demo-test
+```
+
+## Requesting Charité HPC Access
 
 The Charité internal user documentation/wiki requires a Charité GitLab account. To request access:
 1. Email sc-hpc-helpdesk@charite.de to request access to the Charité HPC. This initiates the onboarding process.
-2. If you do not have access to git.bihealth.org, contact health-data@charite.de to request GitLab access for the [Charité HPC User Documentation and Onboarding Guide](https://git.bihealth.org/charite-sc-public/sc-wiki/-/wikis/home).
-
-## Running Jobs
-
-> [!CAUTION]
-> Do not attempt to start resource-heavy jobs on frontend nodes. The memory on the frontends is restricted to **1 GB** per user. Your session will get killed (see [Frontend Memory Restrictions](https://git.bihealth.org/charite-sc-public/sc-wiki/-/wikis/faq/frontend-restrictions)).
-
-First, `ssh` into a frontend node via your terminal as you normally would (see [Access](https://git.bihealth.org/charite-sc-public/sc-wiki/-/wikis/Resources/User-Documentation/User-Guide:-HPC-@Charite#access)). You then have 2 options:
-
-### Option 1: Interactive Session
-
-```bash
-srun --job-name=run-nf-core --partition=compute --ntasks=1 --cpus-per-task=1 --mem=1G --time=08:00:00 --pty bash
-```
-
-It is also possible to jump right into an interactive session using the [Open OnDemand Portal](https://s-sc-ood.charite.de/pun/sys/dashboard/batch_connect/sessions) ([Open OnDemand Wiki](https://git.bihealth.org/charite-sc-public/sc-wiki/-/wikis/Resources/User-Documentation/User-Guide:-HPC-@Charite#open-ondemand)). You must be connected the Charité network to use this, either via Ethernet cable or [OpenVPN Connect](https://git.bihealth.org/charite-sc-public/sc-wiki/-/wikis/Resources/User-Documentation/User-Guide:-HPC-@Charite#connection-to-the-cluster-from-outside-the-charite-network-over-vpn).
-
-### Option 2: Batch Script
-
-Create a new file and name it `test.sh`:
-
-```bash
-#!/usr/bin/env bash
-#SBATCH --job-name=test
-#SBATCH --partition=compute
-#SBATCH --ntasks=1
-#SBATCH --cpus-per-task=1
-#SBATCH --mem=1G
-#SBATCH --time=00:01:00
-
-echo "Hello World!"
-```
-
-Submit with `sbatch test.sh`. Examine the output under `slurm-${SLURM_JOB_ID}.out`.
+2. If you do not have access to [git.bihealth.org](https://git.bihealth.org/), contact health-data@charite.de to request GitLab access for the [Charité HPC User Documentation and Onboarding Guide](https://git.bihealth.org/charite-sc-public/sc-wiki/-/wikis/home).
 
 ## Environment Setup
 
 > [!NOTE]
-> In order for the nf-core config to work as intended, some variables must first be exported into the environment before running any workflow. This section provides a detailed overview of those variables.
-> In Section [4. Running nf-core pipelines](#4-running-nf-core-pipelines), a complete practical example is provided, integrating the exporting of the variables with an actual run of a nf-core pipeline.
+> In order for the config to work as intended, some variables must first be exported into the environment before running any workflow. This section provides a detailed overview of those variables.
 
-The code snippets may be:
+> [!NOTE]
+> A complete practical example is provided in the next section, which integrates the exporting of the variables explained here with an actual run of a nf-core pipeline. [Click here to jump to 'Running Nextflow Workflows on the Charité HPC'](#running-nextflow-workflows-on-the-charite-hpc)
 
-1. Copy-pasted into the terminal (e.g. if working in an interactive session). With this method, you must set the variables again every time you start a new session
-2. Added to your Batch script
-3. Added to your `~/.bashrc` file. After doing so, run `source ~/.bashrc` or start a new session, in order for the variables to be exported. You then no longer need to export them every time
+### Redirecting Output to Scratch
 
-> [!WARNING]
-> Be mindful of what you add into your `~/.bashrc` file, as it may unexpectedly alter the desired behavior of other programs.
+The Charité HPC profile uses project-specific scratch storage for Nextflow and Apptainer files whenever available. Storage paths are determined automatically based on the `PROJ_ABBR` environment variable:
+
+- **If `PROJ_ABBR` is non-empty:** `PROJ_SCRATCHDIR_CHARITE_USER` is set to `/sc-scratch/sc-scratch-${PROJ_ABBR}`.
+- **If `PROJ_ABBR` is empty:** `PROJ_SCRATCHDIR_CHARITE_USER` falls back to `${HOME}`, which has a **100 GB storage quota**.
+
+The profile requires `PROJ_SCRATCHDIR_CHARITE_USER` to be defined and will fail if it is missing.
+
+**Using project scratch storage is strongly recommended**, particularly for large pipelines, as Apptainer caches and Nextflow working directories can quickly exhaust the home-directory quota.
+
+For more information on managing project and scratch storage, refer to the Charité HPC documentation:
+
+- **Existing project members:** [How to access project and scratch directories](https://git.bihealth.org/charite-sc-public/sc-wiki/-/wikis/Resources/HOWTOs/how-to-access-project-and-scratch-directories)
+- **Users without an assigned project:** [How to apply for project and scratch directories](https://git.bihealth.org/charite-sc-public/sc-wiki/-/wikis/Resources/HOWTOs/how-to-apply-for-project-and-scratch-directories)
+- **Project administrators:** [How to manage project and scratch directories](https://git.bihealth.org/charite-sc-public/sc-wiki/-/wikis/Resources/HOWTOs/how-to-manage-project-and-scratch-directories)
+
 
 ### Global Utility Variables
 
@@ -129,14 +118,6 @@ if [ -z "${PROJ_SCRATCHDIR_CHARITE_USER:-}" ]; then # Fail-safe mechanism, since
   exit 1
 fi
 ```
-
-Users of the Charité HPC are recommended to make use of an assigned project's scratch directory at `/sc-scratch/sc-scratch-${PROJ_ABBR}` whenever possible (see here for more info on [how to access project and scratch directories](https://git.bihealth.org/charite-sc-public/sc-wiki/-/wikis/Resources/HOWTOs/how-to-access-project-and-scratch-directories)).
-
-> **No assigned project?** The setup still works by falling back to `${HOME}`, but home directories are limited to **100 GB**. Large pipelines can reach this limit quickly, so users without project scratch should monitor their home-directory usage carefully (see here for more info on [how to apply for project and scratch directories
-](https://git.bihealth.org/charite-sc-public/sc-wiki/-/wikis/Resources/HOWTOs/how-to-apply-for-project-and-scratch-directories)).
-
-> **You are already a group admin and want to add your collaborator to a project?** See here for more info on [how to manage project and scratch directories
-](https://git.bihealth.org/charite-sc-public/sc-wiki/-/wikis/Resources/HOWTOs/how-to-manage-project-and-scratch-directories).
 
 ### Apptainer-specific Variables
 
@@ -156,8 +137,7 @@ mkdir -p "${APPTAINER_TMPDIR}" # otherwise Nextflow launch fails
 ```nextflow
 apptainer {
     // ...
-    cacheDir    = System.getenv("NXF_APPTAINER_CACHEDIR") ? System.getenv("NXF_APPTAINER_CACHEDIR") :
-                                                            "${params.proj_scratchdir_charite_user}/apptainer-images"
+    cacheDir    = System.getenv("NXF_APPTAINER_CACHEDIR") ?: "${params.proj_scratchdir_charite_user}/apptainer-images"
     // ...
 }
 ```
@@ -220,6 +200,8 @@ Your folder structure should now look like this:
 └── nxf-work # controlled by `workDir` in the config
 ```
 
+### Nextflow Strict Syntax
+
 > [!IMPORTANT]
 > **Temporary Nextflow / nf-core compatibility workaround**
 >
@@ -234,17 +216,50 @@ Your folder structure should now look like this:
 > This should be removed once the pipelines you are using becomes compatible with the v2 parser.
 > You can read up more about strict syntax [here](https://docs.seqera.io/nextflow/strict-syntax).
 
-### Nextflow Conda Environment
 
-The Conda environment `nf-core-2026-1` is provided by the SC HPC Team, which you can readily use. It contains both the nf-core CLI (v4.2.0) as well as Nextflow (v26.10.4)
+
+
+
+
+
+## Running Nextflow Workflows on the Charité HPC
+
+### Conda Environment
+
+The Conda environment `nf-core-2026-1` is provided by the SC HPC Team, which you can readily use. It contains both the nf-core CLI (`v4.2.0`) as well as Nextflow (`v26.10.4`).
 
 ```bash
 conda activate nf-core-2026-1
 ```
 
-## Running nf-core pipelines
 
-In order to run nf-core pipelines with the Charité HPC config, you must follow one of the 2 options highlighted in [2. Getting started with running jobs](#2-getting-started-with-running-jobs). This is because Apptainer is not installed on frontend nodes, which will result in using the profile to fail immediately.
+
+
+The code snippets may be:
+
+1. Copy-pasted into the terminal (e.g. if working in an interactive session). With this method, you must set the variables again every time you start a new session
+2. Added to your Batch script
+3. Added to your `~/.bashrc` file. After doing so, run `source ~/.bashrc` or start a new session, in order for the variables to be exported. You then no longer need to export them every time
+
+> [!WARNING]
+> Be mindful of what you add into your `~/.bashrc` file, as it may unexpectedly alter the desired behavior of other programs.
+
+
+> [!CAUTION]
+> Do not attempt to start resource-heavy jobs on frontend nodes. The memory on the frontends is restricted to **1 GB** per user. Your session will get killed (see [Frontend Memory Restrictions](https://git.bihealth.org/charite-sc-public/sc-wiki/-/wikis/faq/frontend-restrictions)).
+
+First, `ssh` into a frontend node via your terminal as you normally would (see [Access](https://git.bihealth.org/charite-sc-public/sc-wiki/-/wikis/Resources/User-Documentation/User-Guide:-HPC-@Charite#access)). You then have 2 options:
+
+### Option 1: Interactive Session
+
+```bash
+# Interactive sessions launched with srun are capped at 8 hours runtime
+srun --job-name=run-nf-core --partition=compute --ntasks=1 --cpus-per-task=4 --mem=16G --time=08:00:00 --pty bash
+```
+
+It is also possible to jump right into an interactive session using the [Open OnDemand Portal](https://s-sc-ood.charite.de/pun/sys/dashboard/batch_connect/sessions) ([Open OnDemand Wiki](https://git.bihealth.org/charite-sc-public/sc-wiki/-/wikis/Resources/User-Documentation/User-Guide:-HPC-@Charite#open-ondemand)). You must be connected the Charité network to use this, either via Ethernet cable or [OpenVPN Connect](https://git.bihealth.org/charite-sc-public/sc-wiki/-/wikis/Resources/User-Documentation/User-Guide:-HPC-@Charite#connection-to-the-cluster-from-outside-the-charite-network-over-vpn).
+
+### Option 2: Batch Script
 
 Here is an example with a Batch script. In your workspace, save the following script under `nf-core-demo-test.sh` and submit it with `sbatch nf-core-demo-test.sh`:
 
@@ -311,11 +326,76 @@ nextflow run nf-core/demo \
 
 ## Job Assignment Logic, Resource Allocation, GPU Acceleration
 
-Jobs will get assigned `--partition=compute` with `--qos=normal` by default. You do not need to assign resource values yourself to any of the tools used in the pipelines; nf-core takes care of that. Tools are tagged with labels such as `process_single`, `process_high`, `process_high_memory`. Depending on the label, jobs get assigned corresponding resources. If they are insufficient, the job will be given more resources on the next attempt (`maxRetries = 5`). See [`nf-core/rnaseq`'s `base.config`](https://github.com/nf-core/rnaseq/blob/master/conf/base.config) as an example.
 
-Some tools can benefit from Nvidia GPU acceleration (`process_gpu` label). There are 2 GPU queues available on the HPC. If a task strictly needs more than 1 GPU, it will get allocated to `pgpu`, otherwise it will get allocated to `gpu`.
+```mermaid
+flowchart TB
+    A(["Nextflow pipeline launched"])
+    Q["Process QOS 'normal'"]
+    B{"Process labeled 'process_gpu?'"}
 
-## Additional Profiles
+    A --> Q --> B
+
+    subgraph ROUTING[" "]
+        direction LR
+
+        subgraph GPU["GPU routing"]
+            direction TB
+            C{"Number of GPUs requested?"}
+            D["gpu"]
+            E["pgpu"]
+
+            C -->|"1 GPU"| D
+            C -->|"2+ GPUs"| E
+        end
+
+        subgraph CPU["CPU routing"]
+            direction TB
+            F{"Selected profile(s)?"}
+
+            G["compute"]
+            H["dragen_cc05"]
+            I["dragen_cc15"]
+            J["dragen_gp"]
+            K["highmem"]
+            L["genomics"]
+
+            F -->|"-profile charite"| G
+            F -->|"-profile charite,dragen_cc05"| H
+            F -->|"-profile charite,dragen_cc15"| I
+            F -->|"-profile charite,dragen_gp"| J
+            F -->|"-profile charite,highmem"| K
+            F -->|"-profile charite,genomics"| L
+        end
+    end
+
+    B -->|"Yes — any profile"| C
+    B -->|"No"| F
+
+    D --> N(["Slurm Scheduler"])
+    E --> N
+    G --> N
+    H --> N
+    I --> N
+    J --> N
+    K --> N
+    L --> N
+
+    classDef start fill:#dbeafe,stroke:#2563eb,color:#1e40af
+    classDef gpu fill:#dcfce7,stroke:#16a34a,color:#166534
+    classDef cpu fill:#dbeafe,stroke:#2563eb,color:#1e40af
+    classDef decision fill:#fef3c7,stroke:#d97706,color:#78350f
+    classDef qos fill:#f3e8ff,stroke:#9333ea,color:#6b21a8
+
+    class A,N start
+    class Q qos
+    class D,E gpu
+    class G,H,I,J,K,L cpu
+    class B,C,F decision
+
+    style ROUTING fill:none,stroke:none
+    style GPU fill:none,stroke:none
+    style CPU fill:none,stroke:none
+```
 
 The config offers additional profiles, which users can use to run their analyses. Each profile has a dedicated partition with corresponding resource limits. If you are having trouble accessing a partition you should have access to, get in touch with sc-hpc-helpdesk@charite.de.
 
@@ -340,10 +420,30 @@ nextflow run nf-core/<pipeline> -profile charite,<profile>,debug --input samples
 You can also run a pipeline with test data provided by nf-core like this:
 
 ```bash
-nextflow run nf-core/demo -profile charite,test --outdir test-demo
-nextflow run nf-core/rnaseq -profile charite,test --outdir test-rnaseq
+nextflow run nf-core/demo -profile test,charite --outdir test-demo
+nextflow run nf-core/rnaseq -profile test,charite --outdir test-rnaseq
 ```
 
 > [!IMPORTANT]
 >
 > "Order matters. Profiles load in sequence. Later profiles overwrite earlier ones." See [Configuration options](https://nf-co.re/docs/running/configuration/configuration-options) for more info.
+
+## Known Limitations and Issues
+
+### Jobs Pending in `gpu` Partition
+
+Jobs requesting exactly 1 GPU may remain pending for submission to the `gpu` queue for a long time. The SC HPC Team is aware of this issue and is working on a solution. One temporary workaround is to force submission to the `pgpu` queue by requesting at least 2 GPUs.
+
+```nextflow
+process {
+    withLabel:process_gpu {
+        accelerator = 2
+    }
+}
+```
+
+Save the snippet above to `custom.config`, and then run your pipeline like so:
+
+```
+nextflow run nf-core/<pipeline-name> -profile charite --outdir results/<pipeline-name> -c custom.config
+```
