@@ -10,13 +10,13 @@ This page documents the `charite` Nextflow profile for running Nextflow and nf-c
 - [Quick Overview and Usage Examples](#quick-overview-and-usage-examples)
 - [Requesting Charité HPC Access](#requesting-hpc-access)
 - [Environment Setup](#environment-setup)
-  - [Redirecting Output to Scratch](#redirecting-output-to-scratch)
+  - [Redirecting Output to Project Scratch](#redirecting-output-to-project-scratch)
   - [Global Utility Variables](#global-utility-variables)
   - [Apptainer-specific Variables](#apptainer-specific-variables)
   - [Nextflow-specific Variables](#nextflow-specific-variables)
   - [Nextflow Strict Syntax](#nextflow-strict-syntax)
+- [Nextflow Conda Environment](#nextflow-conda-environment)
 - [Running Nextflow Workflows on the Charité HPC](#running-nextflow-workflows-on-the-charité-hpc)
-  - [Conda Environment](#conda-environment)
   - [Option 1: Interactive Session](#option-1-interactive-session)
   - [Option 2: Batch Script](#option-2-batch-script) 
 - [Job Assignment Logic, Resource Allocation, GPU Acceleration](#job-assignment-logic-resource-allocation-gpu-acceleration)
@@ -79,13 +79,15 @@ The Charité internal user documentation/wiki requires a Charité GitLab account
 ## Environment Setup
 
 > [!NOTE]
-> In order for the config to work as intended, some variables must first be exported into the environment before running any workflow. This section provides a detailed overview of those variables.
+> In order for the config to work as intended, some environment variables must first be exported before running any workflow. This section provides a detailed overview of those variables.
 >
-> A complete practical example is provided in the next section, which integrates the exporting of the variables explained here with an actual run of a nf-core pipeline. [Click here to skip ahead to 'Running Nextflow Workflows on the Charité HPC'](#running-nextflow-workflows-on-the-charité-hpc)
+> A complete practical example is later provided in the next section, which integrates the exporting of the variables explained together with a run of a nf-core pipeline.
+>
+> [**Click here to skip ahead to 'Running Nextflow Workflows on the Charité HPC'**](#running-nextflow-workflows-on-the-charité-hpc)
 
-### Redirecting Output to Scratch
+### Redirecting Output to Project Scratch
 
-The Charité HPC profile uses project-specific scratch storage for Nextflow and Apptainer files whenever available. Storage paths are determined automatically based on the `PROJ_ABBR` environment variable:
+The Charité HPC profile uses project-specific scratch storage for Nextflow and Apptainer cache and temporary files whenever available. Storage paths are determined automatically based on the `PROJ_ABBR` environment variable:
 
 - **If `PROJ_ABBR` is non-empty:** `PROJ_SCRATCHDIR_CHARITE_USER` is set to `/sc-scratch/sc-scratch-${PROJ_ABBR}`.
 - **If `PROJ_ABBR` is empty:** `PROJ_SCRATCHDIR_CHARITE_USER` falls back to `${HOME}`, which has a **100 GB storage quota**.
@@ -104,74 +106,114 @@ For more information on managing project and scratch storage, refer to the Chari
 ### Global Utility Variables
 
 ```bash
-export PROJ_ABBR="" # Add the abbreviation of your project here if you have one
-if [ -z "${PROJ_ABBR:-}" ]; then
-    export PROJ_SCRATCHDIR_CHARITE_USER="${HOME}"
-else
+# Project abbreviation (leave empty if you don't have one)
+export PROJ_ABBR=""
+if [[ -n "${PROJ_ABBR}" ]]; then
     export PROJ_SCRATCHDIR_CHARITE="/sc-scratch/sc-scratch-${PROJ_ABBR}"
+    # Validate project scratch directory
+    if [[ ! -d "${PROJ_SCRATCHDIR_CHARITE}" || ! -x "${PROJ_SCRATCHDIR_CHARITE}" ]]; then
+        echo "[ERROR] Project scratch directory does not exist or is inaccessible: ${PROJ_SCRATCHDIR_CHARITE}"
+        echo "[ERROR] Please verify your PROJ_ABBR ('${PROJ_ABBR}') and project access."
+        exit 1
+    fi
     export PROJ_SCRATCHDIR_CHARITE_USER="${PROJ_SCRATCHDIR_CHARITE}/${USER}"
+else
+    export PROJ_SCRATCHDIR_CHARITE_USER="${HOME}"
 fi
-
-if [ -z "${PROJ_SCRATCHDIR_CHARITE_USER:-}" ]; then # Fail-safe mechanism, since profile relies on this variable
-  echo "[ERROR] Variable PROJ_SCRATCHDIR_CHARITE_USER has not been set. Shutting down..."
-  exit 1
+# Fail-safe: ensure the required environment variable is not empty
+if [[ -z "${PROJ_SCRATCHDIR_CHARITE_USER:-}" ]]; then
+    echo "[ERROR] PROJ_SCRATCHDIR_CHARITE_USER is not set or is empty."
+    exit 1
 fi
 ```
 
 ### Apptainer-specific Variables
 
-Apptainer requires no module loading, as it is readily available on compute nodes.
+| Variable | Purpose | Default location |
+|---|---|---|
+| `APPTAINER_CACHEDIR` | Cache used internally by Apptainer when downloading and building images | `${PROJ_SCRATCHDIR_CHARITE_USER}/.apptainer` |
+| `APPTAINER_TMPDIR` | Temporary files generated during image creation | `${PROJ_SCRATCHDIR_CHARITE_USER}/.apptainer/tmp` |
+| `NXF_APPTAINER_CACHEDIR` (Nextflow equivalent `apptainer.cacheDir`)| Location of built Apptainer container images (`.sif`) | `${PROJ_SCRATCHDIR_CHARITE_USER}/apptainer-images` |
+
+Apptainer is readily available on Charité HPC compute nodes and does not require loading a module.
+
+The configuration distinguishes between **Apptainer's internal cache and temporary files** and **Nextflow's cached container images**. These are stored separately to allow users to customize image storage without affecting Apptainer's internal operations.
+
+#### 1. Apptainer Cache and Temporary Files
+
+The following environment variables define where Apptainer stores its internal cache and temporary files:
+
 
 ```bash
-# Control where Apptainer stores cached data and temporary working files
-# Must be unique to each user, hence under ${PROJ_SCRATCHDIR_CHARITE_USER}
-# See https://apptainer.org/docs/user/main/build_env.html#cache-folders
+# Apptainer cache and temporary files (user-specific)
 export APPTAINER_CACHEDIR="${PROJ_SCRATCHDIR_CHARITE_USER}/.apptainer"
 export APPTAINER_TMPDIR="${PROJ_SCRATCHDIR_CHARITE_USER}/.apptainer/tmp"
-mkdir -p "${APPTAINER_TMPDIR}" # otherwise Nextflow launch fails
+mkdir -p "${APPTAINER_TMPDIR}"
 ```
 
-`NXF_APPTAINER_CACHEDIR` (Nextflow equivalent: `apptainer.cacheDir`) determines where Apptainer will save the built images (`*.img`). The config here dynamically assigns this path a value, depending on if the user chooses to override the default by setting `NXF_APPTAINER_CACHEDIR`
+#### 2. Container Image Cache
 
-```nextflow
+The location of built Apptainer container images (`.sif`) is managed through through `NXF_APPTAINER_CACHEDIR` and `apptainer.cacheDir`.
+
+```groovy
 apptainer {
     // ...
-    cacheDir    = System.getenv("NXF_APPTAINER_CACHEDIR") ?: "${params.proj_scratchdir_charite_user}/apptainer-images"
+    cacheDir = System.getenv("NXF_APPTAINER_CACHEDIR") ?: "${params.proj_scratchdir_charite_user}/apptainer-images"
     // ...
 }
 ```
 
-**Has `${NXF_APPTAINER_CACHEDIR}` been defined as an environment variable by the user?**
+By default, container images are stored in the following **user-specific directory**: `${PROJ_SCRATCHDIR_CHARITE_USER}/apptainer-images`
 
-- No &rarr; defaults to `${PROJ_SCRATCHDIR_CHARITE_USER}/apptainer-images` &rarr; your folder structure will look like this:
+The resulting default structure looks like this:
 
+```bash
+/sc-scratch/sc-scratch-${PROJ_ABBR}/
+├── user1/
+│   ├── .apptainer/
+│   │   ├── cache/
+│   │   └── tmp/
+│   └── apptainer-images/
+└── user2/
+│   ├── .apptainer/
+│   │   ├── cache/
+│   │   └── tmp/
+│   └── apptainer-images/
 ```
-/sc-scratch/sc-scratch-${PROJ_ABBR}/${USER}/
-├── .apptainer
-│   ├── cache
-│   └── tmp
-└── apptainer-images
-```
 
-- Yes &rarr; `${NXF_APPTAINER_CACHEDIR}` overrides the default path assignment.
+Users can optionally override this location like so:
 
-**How is this useful?** You may set this to a custom path where you are already storing Apptainer images. Another possibility is to store built at a centralized path accessible to all collaborators of a project, if agreed upon by all. This then allows reuse of images between users and keeps unnecessary redownloading of images to the project scratch to a minimum. You can achieve this by executing:
-
-```
+```bash
+# Adjust path as needed, this is just an example
 export NXF_APPTAINER_CACHEDIR="${PROJ_SCRATCHDIR_CHARITE}/apptainer-images"
 ```
 
-&rarr; Your folder structure would then look like this:
+For projects with multiple collaborators, container images can be stored in a shared project directory rather than duplicated in each user's scratch directory. This allows collaborators to reuse already downloaded images, reducing redundant downloads and storage consumption.
 
+```bash
+/sc-scratch/sc-scratch-${PROJ_ABBR}/
+├── apptainer-images/             # Shared container images (optional)
+├── user1/
+│   └── .apptainer/
+│       ├── cache/
+│       └── tmp/
+└── user2/
+    └── .apptainer/
+        ├── cache/
+        └── tmp/
 ```
-/sc-scratch/sc-scratch-${PROJ_ABBR}/${USER}/
-└── .apptainer
-    ├── cache
-    └── tmp
 
+**Note:** Shared image directories require appropriate read/write permissions. Collaborators should coordinate access and avoid modifying or deleting images that others may be using. Please discuss this with your team.
 
-/sc-scratch/sc-scratch-${PROJ_ABBR}/ # or another custom path
-└── apptainer-images
+The following diagram illustrates how Nextflow determines where to store container images:
+
+```mermaid
+flowchart TD
+    A["Nextflow Apptainer Configuration"] --> B{"NXF_APPTAINER_CACHEDIR set?"}
+    B -->|No| C["Default: User-specific image directory"]
+    B -->|Yes| D["Custom image directory"]
+    C --> E["PROJ_SCRATCHDIR_CHARITE_USER/apptainer-images"]
+    D --> F["NXF_APPTAINER_CACHEDIR"]
 ```
 
 ### Nextflow-specific Variables
@@ -214,9 +256,7 @@ Your folder structure should now look like this:
 > This should be removed once the pipelines you are using becomes compatible with the v2 parser.
 > You can read up more about strict syntax [here](https://docs.seqera.io/nextflow/strict-syntax).
 
-## Running Nextflow Workflows on the Charité HPC
-
-### Conda Environment
+## Nextflow Conda Environment
 
 The Conda environment `nf-core-2026-1` is provided by the SC HPC Team, which you can readily use. It contains both the nf-core CLI (`v4.2.0`) as well as Nextflow (`v26.10.4`).
 
@@ -224,24 +264,28 @@ The Conda environment `nf-core-2026-1` is provided by the SC HPC Team, which you
 conda activate nf-core-2026-1
 ```
 
-### Option 1: Interactive Session
+## Running Nextflow Workflows on the Charité HPC
 
 > [!CAUTION]
-> Do not attempt to start resource-heavy jobs on frontend nodes. The memory on the frontends is restricted to **1 GB** per user. Your session will get killed (see [Frontend Memory Restrictions](https://git.bihealth.org/charite-sc-public/sc-wiki/-/wikis/faq/frontend-restrictions)). It is therefore recommended to work in an interactive session.
+> Do not attempt to start resource-heavy jobs on frontend nodes. The memory on the frontends is restricted to **1 GB** per user. Your session will get killed (see [Frontend Memory Restrictions](https://git.bihealth.org/charite-sc-public/sc-wiki/-/wikis/faq/frontend-restrictions)). It is therefore recommended to either work in an interactive session or submit your jobs via Batch scripts.
 
-#### srun
+### Option 1: Interactive Session
+
+#### Interactive Session via `srun`
+
+First, `ssh` into a frontend node via your terminal as you normally would (see [Access](https://git.bihealth.org/charite-sc-public/sc-wiki/-/wikis/Resources/User-Documentation/User-Guide:-HPC-@Charite#access)).
 
 ```bash
 # Interactive sessions launched with srun are capped at 8 hours runtime
 srun --job-name=run-nf-core --partition=compute --ntasks=1 --cpus-per-task=4 --mem=16G --time=08:00:00 --pty bash
 ```
 
-#### Open OnDemand Portal
+#### Interactive Session via Open OnDemand Portal
 
 It is also possible to jump right into an interactive session using the [Open OnDemand Portal](https://s-sc-ood.charite.de/pun/sys/dashboard/batch_connect/sessions) ([Open OnDemand Wiki](https://git.bihealth.org/charite-sc-public/sc-wiki/-/wikis/Resources/User-Documentation/User-Guide:-HPC-@Charite#open-ondemand)). You must be connected the Charité network to use this, either via Ethernet cable or [OpenVPN Connect](https://git.bihealth.org/charite-sc-public/sc-wiki/-/wikis/Resources/User-Documentation/User-Guide:-HPC-@Charite#connection-to-the-cluster-from-outside-the-charite-network-over-vpn).
 
 <details closed>
-<summary>Click here to reveal the variables code snippet for easy copy-pasting</summary>
+<summary>**Click here to reveal the complete variables code snippet for easy copy-pasting**</summary>
 
 ```bash
 # 1. Global Utility Variables
@@ -287,29 +331,21 @@ cd ${MY_NFCORE_WORKSPACE}
 
 </details>
 
-The above variables code snippet may be:
+Once in an interactive session, you may choose to copy-paste the code snippet...
 
-1. Copy-pasted into the terminal. With this method, you must set the variables again every time you start a new session.
-2. Copy-pasted into your `~/.bashrc` file. After doing so, you must run `source ~/.bashrc` or start a new session, in order for the variables to be exported. Using this method, you no longer need to export them every time.
+1. ...directly into the terminal. With this method, you must set the variables again every time you start a new session.
+2. ...into your `~/.bashrc` file. After doing so, you must run `source ~/.bashrc` or start a new session, in order for the variables to be exported. Once done, you no longer need to export them with every new session
 
 > [!WARNING]
-> Be mindful of what you add into your `~/.bashrc` file, as it may unexpectedly alter the desired behavior of other programs.
-
-
-
-
-First, `ssh` into a frontend node via your terminal as you normally would (see [Access](https://git.bihealth.org/charite-sc-public/sc-wiki/-/wikis/Resources/User-Documentation/User-Guide:-HPC-@Charite#access)). You then have 2 options:
-
-
-
+> Be mindful of what you add into your `~/.bashrc` file, as it may unexpectedly alter the expected behavior of other existing applications.
 
 ### Option 2: Batch Script
 
-Here is an example with a Batch script. In your workspace, save the following script under `nf-core-demo-test.sh` and submit it with `sbatch nf-core-demo-test.sh`:
+First, `ssh` into a frontend node via your terminal as you normally would (see [Access](https://git.bihealth.org/charite-sc-public/sc-wiki/-/wikis/Resources/User-Documentation/User-Guide:-HPC-@Charite#access)).Then, save the following script under `run-nf-core-pipeline.sh` and submit it with `sbatch run-nf-core-pipeline.sh`:
 
 ```bash
 #!/usr/bin/env bash
-#SBATCH --job-name=run-nf-core-demo-test
+#SBATCH --job-name=run-nf-core-<pipeline>
 #SBATCH --partition=compute
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=4
@@ -319,7 +355,7 @@ Here is an example with a Batch script. In your workspace, save the following sc
 # Activate Conda & Nextflow
 set +e
 source /etc/profile.d/conda.sh
-conda activate nextflow-26.04.6
+conda activate nf-core-2026-1
 set -e
 
 # 1. Global Utility Variables
@@ -364,8 +400,8 @@ cd ${MY_NFCORE_WORKSPACE}
 
 # Do the work
 nextflow run nf-core/demo \
-    -profile charite \
-    --outdir demo-test
+    -profile test,charite \
+    --outdir results/demo-test
 
     # -r <version> \ # Optional: pin a specific revision of a pipeline
     # -resume \ # Optional: resume an interrupted workflow
@@ -373,7 +409,6 @@ nextflow run nf-core/demo \
 ```
 
 ## Job Assignment Logic, Resource Allocation, GPU Acceleration
-
 
 ```mermaid
 flowchart TB
