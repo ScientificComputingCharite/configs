@@ -253,16 +253,25 @@ export NXF_OPTS="-Xms1g -Xmx4g"
 # NXF_WORK is handled by the config
 ```
 
-Your folder structure should now look like this:
+Your folder structure should now look like this, assuming default assignment of `NXF_APPTAINER_CACHEDIR`:
 
-```
-/sc-scratch/sc-scratch-${PROJ_ABBR}/${USER}/
-├── .apptainer
-│   ├── cache
-│   └── tmp
-├── apptainer-images
-├── .nextflow
-└── nxf-work # controlled by `workDir` in the config
+```bash
+/sc-scratch/sc-scratch-${PROJ_ABBR}/
+├── user1/
+│   ├── .apptainer/
+│   │   ├── cache/
+│   │   └── tmp/
+│   ├── apptainer-images/
+│   ├── .nextflow
+│   └── nxf-work
+├── user2/
+│   ├── .apptainer/
+│   │   ├── cache/
+│   │   └── tmp/
+│   ├── apptainer-images/
+│   ├── .nextflow
+│   └── nxf-work
+...
 ```
 
 ### Nextflow Strict Syntax
