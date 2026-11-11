@@ -537,11 +537,11 @@ The config offers additional profiles, which users can use to run their analyses
 nextflow run nf-core/<pipeline> -profile charite,<profile> --input samplesheet.csv --outdir results
 ```
 
-| Partition / Queue     | `compute` | `dragen_cc05` | `dragen_cc15` | `dragen_gp` | `highmem` | `genomics`  | `gpu`     | `pgpu` |
-| :-------------        | :-------: | :-----------: | :-----------: | :---------: | :--------: | :--------: | :-------: | :----: |
+| Partition / Queue     | `compute` | `dragen_cc05` | `dragen_cc15` | `dragen_gp` | `genomics` | `highmem`  | `gpu`     | `pgpu` |
+| :-------------:        | :-------: | :-----------: | :-----------: | :---------: | :--------: | :--------: | :-------: | :----: |
 | **Max CPUs**          | 192       | 64            | 64            | 48          | 192        | 192        | 64        | 128    |
-| **Max Memory**        | 1 TB      | 500 GB        | 500 GB        | 240 GB      | 4 TB       | 1 TB       | 500 GB    | 2 TB   |
-| **Max Time**          | 2 days    | 7 days        | 7 days        | 7 days      | 2 days     | 7 days     | 2 days    | 2 days |
+| **Max Memory**        | 1 TB      | 500 GB        | 500 GB        | 240 GB      | 1 TB       | 4 TB       | 500 GB    | 2 TB   |
+| **Max Time**          | 2 days    | 7 days        | 7 days        | 7 days      | 7 days     | 2 days     | 2 days    | 2 days |
 
 `debug` is an additional utility profile rather than a one with a dedicated partition. It disables automatic cleanup.
 
