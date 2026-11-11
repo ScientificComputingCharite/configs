@@ -413,8 +413,8 @@ nextflow run nf-core/demo \
 ```mermaid
 flowchart TB
     A(["Process / Job"])
-    Q["'normal' QOS"]
-    B["'process_gpu'? label"]
+    Q["QOS: 'normal'"]
+    B["Label: 'process_gpu'?"]
 
     A --> Q --> B
 
@@ -465,9 +465,9 @@ flowchart TB
 
     classDef start fill:#dbeafe,stroke:#2563eb,color:#1e40af
     classDef gpu fill:#dcfce7,stroke:#16a34a,color:#166534
-    classDef cpu fill:#dbeafe,stroke:#2563eb,color:#1e40af
+    classDef cpu fill:#dcfce7,stroke:#16a34a,color:#166534
     classDef decision fill:#fef3c7,stroke:#d97706,color:#78350f
-    classDef qos fill:#f3e8ff,stroke:#9333ea,color:#6b21a8
+    classDef qos fill:#dbeafe,stroke:#2563eb,color:#1e40af
 
     class A,N start
     class Q qos
