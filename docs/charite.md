@@ -129,17 +129,17 @@ fi
 
 ### Apptainer-specific Variables
 
-| Variable | Purpose | Default location |
+| Variable | Purpose | Location |
 |---|---|---|
 | `APPTAINER_CACHEDIR` | Cache used internally by Apptainer when downloading and building images | `${PROJ_SCRATCHDIR_CHARITE_USER}/.apptainer` |
 | `APPTAINER_TMPDIR` | Temporary files generated during image creation | `${PROJ_SCRATCHDIR_CHARITE_USER}/.apptainer/tmp` |
-| `NXF_APPTAINER_CACHEDIR` (Nextflow equivalent `apptainer.cacheDir`)| Location of built Apptainer container images (`.sif`) | `${PROJ_SCRATCHDIR_CHARITE_USER}/apptainer-images` |
+| `NXF_APPTAINER_CACHEDIR` (Nextflow equivalent `apptainer.cacheDir`)| Location of built Apptainer images | `${PROJ_SCRATCHDIR_CHARITE_USER}/apptainer-images` |
 
 Apptainer is readily available on Charité HPC compute nodes and does not require loading a module.
 
 The configuration distinguishes between **Apptainer's internal cache and temporary files** and **Nextflow's cached container images**. These are stored separately to allow users to customize image storage without affecting Apptainer's internal operations.
 
-#### 1. Apptainer Cache and Temporary Files
+#### Apptainer Cache and Temporary Files
 
 The following environment variables define where Apptainer stores its internal cache and temporary files:
 
@@ -151,7 +151,7 @@ export APPTAINER_TMPDIR="${PROJ_SCRATCHDIR_CHARITE_USER}/.apptainer/tmp"
 mkdir -p "${APPTAINER_TMPDIR}"
 ```
 
-#### 2. Container Image Cache
+#### Container Image Cache
 
 The location of built Apptainer container images is managed through through `NXF_APPTAINER_CACHEDIR` and `apptainer.cacheDir`.
 
@@ -237,15 +237,20 @@ flowchart TD
 
 ### Nextflow-specific Variables
 
+See [Nextflow Settings](https://docs.seqera.io/nextflow/reference/env-vars/#nextflow-settings) for more info.
+
 ```bash
 # Nextflow-specific Variables
-# Centralize Nextflow cache and home into one directory
+# Centralize Nextflow home, cache and temp into one directory
 export NXF_HOME="${PROJ_SCRATCHDIR_CHARITE_USER}/.nextflow"
 export NXF_CACHE_DIR="${NXF_HOME}"
+export NXF_TEMP="${NXF_HOME}/tmp"
+mkdir -p ${NXF_TEMP}
 # According to nf-core:
 # "In some cases, the Nextflow Java virtual machines can start to request a large amount of memory.
 # We recommend adding the following line to your environment to limit this."
 export NXF_OPTS="-Xms1g -Xmx4g"
+# NXF_WORK is handled by the config
 ```
 
 Your folder structure should now look like this:
@@ -356,10 +361,12 @@ It is also possible to jump right into an interactive session using the [Open On
 > 
 > </details>
 
+---
+
 Once in an interactive session, you may choose to copy-paste the code snippet...
 
-1. ...directly into the terminal. With this method, you must set the variables again every time you start a new session.
-2. ...into your `~/.bashrc` file. After doing so, you must run `source ~/.bashrc` or start a new session, in order for the variables to be exported. Once done, you no longer need to export them with every new session
+1. ...into your terminal. With this method however, you must set the variables again every time you start a new session.
+2. ...into your `~/.bashrc` file. After doing so, you must run `source ~/.bashrc` or start a new session, in order for the variables to be exported. Once done, you no longer need to export them with every new session.
 
 > [!WARNING]
 > Be mindful of what you add into your `~/.bashrc` file, as it may unexpectedly alter the expected behavior of other existing applications.
