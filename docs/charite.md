@@ -414,7 +414,7 @@ nextflow run nf-core/demo \
 flowchart TB
     A(["Process / Job"])
     Q["'normal' QOS"]
-    B{"'process_gpu'?"}
+    B["'process_gpu'? label"]
 
     A --> Q --> B
 
@@ -423,7 +423,7 @@ flowchart TB
 
         subgraph GPU["GPU routing"]
             direction TB
-            C{"# GPUs?"}
+            C["GPUs requested?"]
             D["gpu"]
             E["pgpu"]
 
@@ -433,7 +433,7 @@ flowchart TB
 
         subgraph CPU["CPU routing"]
             direction TB
-            F{"Profile(s)"}
+            F["Profile(s)?"]
 
             G["compute"]
             H["dragen_cc05"]
