@@ -303,60 +303,60 @@ It is also possible to jump right into an interactive session using the [Open On
 
 > [!NOTE]
 > Click here to reveal the complete variables code snippet for easy copy-pasting
-
-<details closed>
-<summary>Code Snippet</summary>
-
-```bash
-# 1. Global Utility Variables
-# Project abbreviation (leave empty if you don't have one)
-export PROJ_ABBR=""
-if [[ -n "${PROJ_ABBR}" ]]; then
-    export PROJ_SCRATCHDIR_CHARITE="/sc-scratch/sc-scratch-${PROJ_ABBR}"
-    # Validate project scratch directory
-    if [[ ! -d "${PROJ_SCRATCHDIR_CHARITE}" || ! -x "${PROJ_SCRATCHDIR_CHARITE}" ]]; then
-        echo "[ERROR] Project scratch directory does not exist or is inaccessible: ${PROJ_SCRATCHDIR_CHARITE}"
-        echo "[ERROR] Please verify your PROJ_ABBR ('${PROJ_ABBR}') and project access."
-        exit 1
-    fi
-    export PROJ_SCRATCHDIR_CHARITE_USER="${PROJ_SCRATCHDIR_CHARITE}/${USER}"
-else
-    export PROJ_SCRATCHDIR_CHARITE_USER="${HOME}"
-fi
-# Fail-safe: ensure the required environment variable is not empty
-if [[ -z "${PROJ_SCRATCHDIR_CHARITE_USER:-}" ]]; then
-    echo "[ERROR] PROJ_SCRATCHDIR_CHARITE_USER is not set or is empty."
-    exit 1
-fi
-
-# 2. Apptainer-specific Variables
-# Control where Apptainer stores cached data and temporary working files
-export APPTAINER_CACHEDIR="${PROJ_SCRATCHDIR_CHARITE_USER}/.apptainer"
-export APPTAINER_TMPDIR="${PROJ_SCRATCHDIR_CHARITE_USER}/.apptainer/tmp"
-mkdir -p "${APPTAINER_TMPDIR}" # otherwise Nextflow launch fails
-
-# Optional: uncomment the line below if you wish to override the default profile path where Apptainer images will be stored
-# Example path provided assigns a shared location for all collaborators of a project. Change as needed
-# export NXF_APPTAINER_CACHEDIR="${PROJ_SCRATCHDIR_CHARITE}/apptainer-images"
-
-# 3. Nextflow-specific Variables
-# Recommendation by nf-core
-export NXF_OPTS="-Xms1g -Xmx4g"
-# Centralize Nextflow cache and Home into one directory
-export NXF_HOME="${PROJ_SCRATCHDIR_CHARITE_USER}/.nextflow"
-export NXF_CACHE_DIR="${NXF_HOME}"
-
-# Temporary workaround for Nextflow strict syntax
-# Add the line below, so long as the pipeline you are using is not compatible with NXF_SYNTAX_PARSER=v2 (default in Nextflow >=26.04)
-# This must eventually be removed!
-export NXF_SYNTAX_PARSER=v1
-
-# Define your workspace directory // Adjust as needed
-MY_NXF_WORKSPACE="${PROJ_SCRATCHDIR_CHARITE}/my-nxf-workspace"
-cd ${MY_NFCORE_WORKSPACE}
-```
-
-</details>
+> 
+> <details closed>
+> <summary>Code Snippet</summary>
+> 
+> ```bash
+> # 1. Global Utility Variables
+> # Project abbreviation (leave empty if you don't have one)
+> export PROJ_ABBR=""
+> if [[ -n "${PROJ_ABBR}" ]]; then
+>     export PROJ_SCRATCHDIR_CHARITE="/sc-scratch/sc-scratch-${PROJ_ABBR}"
+>     # Validate project scratch directory
+>     if [[ ! -d "${PROJ_SCRATCHDIR_CHARITE}" || ! -x "${PROJ_SCRATCHDIR_CHARITE}" ]]; then
+>         echo "[ERROR] Project scratch directory does not exist or is inaccessible: ${PROJ_SCRATCHDIR_CHARITE}"
+>         echo "[ERROR] Please verify your PROJ_ABBR ('${PROJ_ABBR}') and project access."
+>         exit 1
+>     fi
+>     export PROJ_SCRATCHDIR_CHARITE_USER="${PROJ_SCRATCHDIR_CHARITE}/${USER}"
+> else
+>     export PROJ_SCRATCHDIR_CHARITE_USER="${HOME}"
+> fi
+> # Fail-safe: ensure the required environment variable is not empty
+> if [[ -z "${PROJ_SCRATCHDIR_CHARITE_USER:-}" ]]; then
+>     echo "[ERROR] PROJ_SCRATCHDIR_CHARITE_USER is not set or is empty."
+>     exit 1
+> fi
+> 
+> # 2. Apptainer-specific Variables
+> # Control where Apptainer stores cached data and temporary working files
+> export APPTAINER_CACHEDIR="${PROJ_SCRATCHDIR_CHARITE_USER}/.apptainer"
+> export APPTAINER_TMPDIR="${PROJ_SCRATCHDIR_CHARITE_USER}/.apptainer/tmp"
+> mkdir -p "${APPTAINER_TMPDIR}" # otherwise Nextflow launch fails
+> 
+> # Optional: uncomment the line below if you wish to override the default profile path where Apptainer images will be stored
+> # Example path provided assigns a shared location for all collaborators of a project. Change as needed
+> # export NXF_APPTAINER_CACHEDIR="${PROJ_SCRATCHDIR_CHARITE}/apptainer-images"
+> 
+> # 3. Nextflow-specific Variables
+> # Recommendation by nf-core
+> export NXF_OPTS="-Xms1g -Xmx4g"
+> # Centralize Nextflow cache and Home into one directory
+> export NXF_HOME="${PROJ_SCRATCHDIR_CHARITE_USER}/.nextflow"
+> export NXF_CACHE_DIR="${NXF_HOME}"
+> 
+> # Temporary workaround for Nextflow strict syntax
+> # Add the line below, so long as the pipeline you are using is not compatible with NXF_SYNTAX_PARSER=v2 (default in Nextflow >=26.04)
+> # This must eventually be removed!
+> export NXF_SYNTAX_PARSER=v1
+> 
+> # Define your workspace directory // Adjust as needed
+> MY_NXF_WORKSPACE="${PROJ_SCRATCHDIR_CHARITE}/my-nxf-workspace"
+> cd ${MY_NFCORE_WORKSPACE}
+> ```
+> 
+> </details>
 
 Once in an interactive session, you may choose to copy-paste the code snippet...
 
