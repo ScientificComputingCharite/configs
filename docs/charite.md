@@ -208,9 +208,14 @@ For projects with multiple collaborators, container images can be stored in a sh
 The following diagram illustrates how Nextflow determines where to store container images:
 
 ```mermaid
+---
+config:
+  flowchart:
+    wrappingWidth: 1000
+---
 flowchart TD
     A(["Apptainer Image Directory"])
-    B{"'export NXF_APPTAINER_CACHEDIR='...'' set by user?"}
+    B["export NXF_APPTAINER_CACHEDIR='...' set by user?"]
     C["User-specific default directory"]
     D["Custom directory"]
     E["${PROJ_SCRATCHDIR_CHARITE_USER}/apptainer-images"]
@@ -425,6 +430,11 @@ nextflow run nf-core/demo \
 ## Job Assignment Logic, Resource Allocation, GPU Acceleration
 
 ```mermaid
+---
+config:
+  flowchart:
+    wrappingWidth: 1000
+---
 flowchart TB
     A(["Process / Job"])
     Q["QOS: 'normal'"]
@@ -437,12 +447,12 @@ flowchart TB
 
         subgraph GPU["GPU routing"]
             direction TB
-            C["GPUs requested?"]
+            C["GPUs requested?\n (i.e. task.accelerator)"]
             D["gpu"]
             E["pgpu"]
 
-            C -->|"1 GPU"| D
-            C -->|"2+ GPUs"| E
+            C -->|"1"| D
+            C -->|"2+"| E
         end
 
         subgraph CPU["CPU routing"]
