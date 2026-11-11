@@ -465,7 +465,7 @@ config:
 ---
 flowchart TB
     A(["Partition / Queue Routing"])
-    B["Label: 'process_gpu'?"]
+    B["Process has label 'process_gpu'?"]
 
     A --> B
 
@@ -480,15 +480,15 @@ flowchart TB
             H["dragen_cc05"]
             I["dragen_cc15"]
             J["dragen_gp"]
-            K["highmem"]
-            L["genomics"]
+            K["genomics"]
+            L["highmem"]
 
             F -->|"-profile charite"| G
             F -->|"-profile charite,dragen_cc05"| H
             F -->|"-profile charite,dragen_cc15"| I
             F -->|"-profile charite,dragen_gp"| J
-            F -->|"-profile charite,highmem"| K
-            F -->|"-profile charite,genomics"| L
+            F -->|"-profile charite,genomics"| K
+            F -->|"-profile charite,highmem"| L
         end
 
         subgraph GPU["GPU routing"]
@@ -537,11 +537,11 @@ The config offers additional profiles, which users can use to run their analyses
 nextflow run nf-core/<pipeline> -profile charite,<profile> --input samplesheet.csv --outdir results
 ```
 
-| Partition / Queue     | `compute` | `dragen_cc05` | `dragen_cc15` | `dragen_gp` | `genomics` | `gpu`  | `highmem` | `pgpu` |
-| :------------- | :-------: | :-----------: | :-----------: | :---------: | :--------: | :----: | :-------: | :----: |
-| **Max CPUs**   | 192       | 64            | 64            | 48          | 192        | 64     | 192       | 128    |
-| **Max Memory** | 1 TB      | 500 GB        | 500 GB        | 240 GB      | 1 TB       | 500 GB | 4 TB      | 2 TB   |
-| **Max Time**   | 2 days    | 7 days        | 7 days        | 7 days      | 7 days     | 2 days | 2 days    | 2 days |
+| Partition / Queue     | `compute` | `dragen_cc05` | `dragen_cc15` | `dragen_gp` | `highmem` | `genomics`  | `gpu`     | `pgpu` |
+| :-------------        | :-------: | :-----------: | :-----------: | :---------: | :--------: | :--------: | :-------: | :----: |
+| **Max CPUs**          | 192       | 64            | 64            | 48          | 192        | 192        | 64        | 128    |
+| **Max Memory**        | 1 TB      | 500 GB        | 500 GB        | 240 GB      | 4 TB       | 1 TB       | 500 GB    | 2 TB   |
+| **Max Time**          | 2 days    | 7 days        | 7 days        | 7 days      | 2 days     | 7 days     | 2 days    | 2 days |
 
 `debug` is an additional utility profile rather than a one with a dedicated partition. It disables automatic cleanup.
 
