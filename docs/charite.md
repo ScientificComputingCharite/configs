@@ -531,34 +531,31 @@ flowchart TB
     style CPU fill:none,stroke:none
 ```
 
-The config offers additional profiles, which users can use to run their analyses. Each profile has a dedicated partition with corresponding resource limits. If you are having trouble accessing a partition you should have access to, get in touch with sc-hpc-helpdesk@charite.de.
+Picture above is the logic that the config follows to determine to which partition SLURM should submit a job to.
 
-```bash
-nextflow run nf-core/<pipeline> -profile charite,<profile> --input samplesheet.csv --outdir results
-```
+> [!IMPORTANT]
+>
+> "Order matters. Profiles load in sequence. Later profiles overwrite earlier ones." (see [Configuration Options](https://nf-co.re/docs/running/configuration/configuration-options) for more info)
+> 
+> For example
+> ```bash
+> nextflow run nf-core/rnaseq -profile charite,genomics,test ...
+> ```
+> 
+> is not the same as
+>
+> ```bash
+> nextflow run nf-core/rnaseq -profile test,charite,genomics ...
+> ```
+>  The last example shown is how you should correctly test pipelines with the `test` dataset provided by nf-core.
+
+Regardless of the profile(s) chosen, jobs that can benefit from GPU acceleration will be handled accordingly and submitted either to `gpu` or `pgpu`, depending on how many GPUs are requested, thanks to the [`withLabel:process_gpu`](https://github.com/ScientificComputingCharite/configs/blob/94d14de3345ff93199bf195608ba955321426f8d/conf/charite.config#L38) specification in [`conf/charite.config`](../conf/charite.config).
 
 | Partition / Queue     | `compute` | `dragen_cc05` | `dragen_cc15` | `dragen_gp` | `genomics` | `highmem`  | `gpu`     | `pgpu` |
 | :-------------:        | :-------: | :-----------: | :-----------: | :---------: | :--------: | :--------: | :-------: | :----: |
 | **Max CPUs**          | 192       | 64            | 64            | 48          | 192        | 192        | 64        | 128    |
 | **Max Memory**        | 1 TB      | 500 GB        | 500 GB        | 240 GB      | 1 TB       | 4 TB       | 500 GB    | 2 TB   |
 | **Max Time**          | 2 days    | 7 days        | 7 days        | 7 days      | 7 days     | 2 days     | 2 days    | 2 days |
-
-`debug` is an additional utility profile rather than a one with a dedicated partition. It disables automatic cleanup.
-
-```bash
-nextflow run nf-core/<pipeline> -profile charite,<profile>,debug --input samplesheet.csv --outdir results
-```
-
-You can also run a pipeline with test data provided by nf-core like this:
-
-```bash
-nextflow run nf-core/demo -profile test,charite --outdir test-demo
-nextflow run nf-core/rnaseq -profile test,charite --outdir test-rnaseq
-```
-
-> [!IMPORTANT]
->
-> "Order matters. Profiles load in sequence. Later profiles overwrite earlier ones." See [Configuration options](https://nf-co.re/docs/running/configuration/configuration-options) for more info.
 
 ## Known Limitations and Issues
 
