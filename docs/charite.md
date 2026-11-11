@@ -153,7 +153,7 @@ mkdir -p "${APPTAINER_TMPDIR}"
 
 #### 2. Container Image Cache
 
-The location of built Apptainer container images (`.sif`) is managed through through `NXF_APPTAINER_CACHEDIR` and `apptainer.cacheDir`.
+The location of built Apptainer container images is managed through through `NXF_APPTAINER_CACHEDIR` and `apptainer.cacheDir`.
 
 ```groovy
 apptainer {
@@ -209,11 +209,25 @@ The following diagram illustrates how Nextflow determines where to store contain
 
 ```mermaid
 flowchart TD
-    A["Nextflow Apptainer Configuration"] --> B{"NXF_APPTAINER_CACHEDIR set?"}
-    B -->|No| C["Default: User-specific image directory"]
-    B -->|Yes| D["Custom image directory"]
-    C --> E["PROJ_SCRATCHDIR_CHARITE_USER/apptainer-images"]
-    D --> F["NXF_APPTAINER_CACHEDIR"]
+    A(["Apptainer Image Directory"])
+    B{"'export NXF_APPTAINER_CACHEDIR='...'' set by user?"}
+    C["User-specific default directory"]
+    D["Custom directory"]
+    E["${PROJ_SCRATCHDIR_CHARITE_USER}/apptainer-images"]
+    F["${NXF_APPTAINER_CACHEDIR}"]
+    A --> B
+    B -->|"No"| C
+    B -->|"Yes"| D
+    C --> E
+    D --> F
+    classDef start fill:#dbeafe,stroke:#2563eb,color:#1e40af
+    classDef decision fill:#fef3c7,stroke:#d97706,color:#78350f
+    classDef path fill:#dcfce7,stroke:#16a34a,color:#166534
+    classDef category fill:#f1f5f9,stroke:#64748b,color:#334155
+    class A start
+    class B decision
+    class C,D category
+    class E,F path
 ```
 
 ### Nextflow-specific Variables
