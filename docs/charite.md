@@ -15,7 +15,7 @@ This page documents the `charite` Nextflow profile for running Nextflow and nf-c
   - [Apptainer-specific Variables](#apptainer-specific-variables)
   - [Nextflow-specific Variables](#nextflow-specific-variables)
   - [Nextflow Strict Syntax](#nextflow-strict-syntax)
-- [Nextflow Conda Environment](#nextflow-conda-environment)
+  - [Nextflow Conda Environment](#nextflow-conda-environment)
 - [Running Nextflow Workflows on the Charité HPC](#running-nextflow-workflows-on-the-charité-hpc)
   - [Option 1: Interactive Session](#option-1-interactive-session)
   - [Option 2: Batch Script](#option-2-batch-script) 
@@ -264,18 +264,16 @@ Your folder structure should now look like this:
 
 > [!IMPORTANT]
 >
-> Nextflow **v26.04** and higher made the **v2 syntax parser** the default as part of the major transition toward strict syntax. However, not all nf-core pipelines have completed this migration yet, and some pipelines can currently fail when parsed with `NXF_SYNTAX_PARSER=v2`. The nf-core training documentation likewise notes that many nf-core pipelines do not yet support the v2 parser.
->
-> Until the affected pipelines have been migrated, set the following **temporary compatibility workaround** to force the legacy parser before launching them:
+> Nextflow **v26.04** and higher made the **v2 syntax parser** the default as part of the major transition toward strict syntax. However, not all nf-core pipelines have completed this migration yet, and some pipelines can currently fail when parsed with `NXF_SYNTAX_PARSER=v2`. Until the affected pipelines have been migrated, set the following **temporary compatibility workaround** to force the legacy parser before launching them:
 >
 > ```bash
 > export NXF_SYNTAX_PARSER=v1
 > ```
 >
-> This should be removed once the pipelines you are using becomes compatible with the v2 parser.
+> This should be removed once the pipelines you are using becomes compatible with the strict parser.
 > You can read up more about strict syntax [here](https://docs.seqera.io/nextflow/strict-syntax).
 
-## Nextflow Conda Environment
+### Nextflow Conda Environment
 
 The Conda environment `nf-core-2026-1` is provided by the SC HPC Team, which you can readily use. It contains both the nf-core CLI (`v4.2.0`) as well as Nextflow (`v26.10.4`).
 
@@ -303,21 +301,31 @@ srun --job-name=run-nf-core --partition=compute --ntasks=1 --cpus-per-task=4 --m
 
 It is also possible to jump right into an interactive session using the [Open OnDemand Portal](https://s-sc-ood.charite.de/pun/sys/dashboard/batch_connect/sessions) ([Open OnDemand Wiki](https://git.bihealth.org/charite-sc-public/sc-wiki/-/wikis/Resources/User-Documentation/User-Guide:-HPC-@Charite#open-ondemand)). You must be connected the Charité network to use this, either via Ethernet cable or [OpenVPN Connect](https://git.bihealth.org/charite-sc-public/sc-wiki/-/wikis/Resources/User-Documentation/User-Guide:-HPC-@Charite#connection-to-the-cluster-from-outside-the-charite-network-over-vpn).
 
+> [!NOTE]
+> Click here to reveal the complete variables code snippet for easy copy-pasting
+
 <details closed>
-<summary>**Click here to reveal the complete variables code snippet for easy copy-pasting**</summary>
+<summary>Code Snippet</summary>
 
 ```bash
 # 1. Global Utility Variables
-export PROJ_ABBR="" # Add the abbreviation of your project here if you have one
-if [ -z "${PROJ_ABBR:-}" ]; then
-    export PROJ_SCRATCHDIR_CHARITE_USER="${HOME}"
-else
+# Project abbreviation (leave empty if you don't have one)
+export PROJ_ABBR=""
+if [[ -n "${PROJ_ABBR}" ]]; then
     export PROJ_SCRATCHDIR_CHARITE="/sc-scratch/sc-scratch-${PROJ_ABBR}"
+    # Validate project scratch directory
+    if [[ ! -d "${PROJ_SCRATCHDIR_CHARITE}" || ! -x "${PROJ_SCRATCHDIR_CHARITE}" ]]; then
+        echo "[ERROR] Project scratch directory does not exist or is inaccessible: ${PROJ_SCRATCHDIR_CHARITE}"
+        echo "[ERROR] Please verify your PROJ_ABBR ('${PROJ_ABBR}') and project access."
+        exit 1
+    fi
     export PROJ_SCRATCHDIR_CHARITE_USER="${PROJ_SCRATCHDIR_CHARITE}/${USER}"
+else
+    export PROJ_SCRATCHDIR_CHARITE_USER="${HOME}"
 fi
-
-if [ -z "${PROJ_SCRATCHDIR_CHARITE_USER:-}" ]; then # Fail-safe mechanism, since profile relies on this variable
-    echo "[ERROR] Variable PROJ_SCRATCHDIR_CHARITE_USER has not been set. Shutting down..."
+# Fail-safe: ensure the required environment variable is not empty
+if [[ -z "${PROJ_SCRATCHDIR_CHARITE_USER:-}" ]]; then
+    echo "[ERROR] PROJ_SCRATCHDIR_CHARITE_USER is not set or is empty."
     exit 1
 fi
 
@@ -360,7 +368,9 @@ Once in an interactive session, you may choose to copy-paste the code snippet...
 
 ### Option 2: Batch Script
 
-First, `ssh` into a frontend node via your terminal as you normally would (see [Access](https://git.bihealth.org/charite-sc-public/sc-wiki/-/wikis/Resources/User-Documentation/User-Guide:-HPC-@Charite#access)).Then, save the following script under `run-nf-core-pipeline.sh` and submit it with `sbatch run-nf-core-pipeline.sh`:
+First, `ssh` into a frontend node via your terminal as you normally would (see [Access](https://git.bihealth.org/charite-sc-public/sc-wiki/-/wikis/Resources/User-Documentation/User-Guide:-HPC-@Charite#access)).
+
+After saving the below script under `run-nf-core-pipeline.sh`, submit it with `sbatch run-nf-core-pipeline.sh`.
 
 ```bash
 #!/usr/bin/env bash
@@ -378,16 +388,23 @@ conda activate nf-core-2026-1
 set -e
 
 # 1. Global Utility Variables
-export PROJ_ABBR="" # Add the abbreviation of your project here if you have one
-if [ -z "${PROJ_ABBR:-}" ]; then
-    export PROJ_SCRATCHDIR_CHARITE_USER="${HOME}"
-else
+# Project abbreviation (leave empty if you don't have one)
+export PROJ_ABBR=""
+if [[ -n "${PROJ_ABBR}" ]]; then
     export PROJ_SCRATCHDIR_CHARITE="/sc-scratch/sc-scratch-${PROJ_ABBR}"
+    # Validate project scratch directory
+    if [[ ! -d "${PROJ_SCRATCHDIR_CHARITE}" || ! -x "${PROJ_SCRATCHDIR_CHARITE}" ]]; then
+        echo "[ERROR] Project scratch directory does not exist or is inaccessible: ${PROJ_SCRATCHDIR_CHARITE}"
+        echo "[ERROR] Please verify your PROJ_ABBR ('${PROJ_ABBR}') and project access."
+        exit 1
+    fi
     export PROJ_SCRATCHDIR_CHARITE_USER="${PROJ_SCRATCHDIR_CHARITE}/${USER}"
+else
+    export PROJ_SCRATCHDIR_CHARITE_USER="${HOME}"
 fi
-
-if [ -z "${PROJ_SCRATCHDIR_CHARITE_USER:-}" ]; then # Fail-safe mechanism, since profile relies on this variable
-    echo "[ERROR] Variable PROJ_SCRATCHDIR_CHARITE_USER has not been set. Shutting down..."
+# Fail-safe: ensure the required environment variable is not empty
+if [[ -z "${PROJ_SCRATCHDIR_CHARITE_USER:-}" ]]; then
+    echo "[ERROR] PROJ_SCRATCHDIR_CHARITE_USER is not set or is empty."
     exit 1
 fi
 
@@ -436,24 +453,13 @@ config:
     wrappingWidth: 1000
 ---
 flowchart TB
-    A(["Process / Job"])
-    Q["QOS: 'normal'"]
+    A(["Partition / Queue Routing"])
     B["Label: 'process_gpu'?"]
 
-    A --> Q --> B
+    A --> B
 
     subgraph ROUTING[" "]
         direction LR
-
-        subgraph GPU["GPU routing"]
-            direction TB
-            C["GPUs requested?\n (i.e. task.accelerator)"]
-            D["gpu"]
-            E["pgpu"]
-
-            C -->|"1"| D
-            C -->|"2+"| E
-        end
 
         subgraph CPU["CPU routing"]
             direction TB
@@ -473,10 +479,21 @@ flowchart TB
             F -->|"-profile charite,highmem"| K
             F -->|"-profile charite,genomics"| L
         end
+
+        subgraph GPU["GPU routing"]
+            direction TB
+            C["GPUs requested?\n (i.e. task.accelerator)"]
+            D["gpu"]
+            E["pgpu"]
+
+            C -->|"1"| D
+            C -->|"2+"| E
+        end
     end
 
-    B -->|"Yes — any profile"| C
     B -->|"No"| F
+    B -->|"Yes — any profile"| C
+
 
     D --> N(["SLURM"])
     E --> N
@@ -494,7 +511,6 @@ flowchart TB
     classDef qos fill:#dbeafe,stroke:#2563eb,color:#1e40af
 
     class A,N start
-    class Q qos
     class D,E gpu
     class G,H,I,J,K,L cpu
     class B,C,F decision
@@ -510,13 +526,11 @@ The config offers additional profiles, which users can use to run their analyses
 nextflow run nf-core/<pipeline> -profile charite,<profile> --input samplesheet.csv --outdir results
 ```
 
-| Profile  | dragen_gp  | dragen_cc05  | dragen_cc15  |  highmem | genomics |
-|---|---|---|---|---|----|
-| Partition  |  dragen_gp | dragen_cc05  |  dragen_cc15 |  highmem |  genomics |
-|  Max CPUs |  48 | 64  |  64 | 192  |  192 |
-|  Max Memory | 240.GB  |  500.GB |  500.GB | 4.TB  |  1.TB |
-|  Max Time |  7.d | 7.d  | 7.d  |  2.d |  7.d |
-
+| Partition / Queue     | `compute` | `dragen_cc05` | `dragen_cc15` | `dragen_gp` | `genomics` | `gpu`  | `highmem` | `pgpu` |
+| :------------- | :-------: | :-----------: | :-----------: | :---------: | :--------: | :----: | :-------: | :----: |
+| **Max CPUs**   | 192       | 64            | 64            | 48          | 192        | 64     | 192       | 128    |
+| **Max Memory** | 1 TB      | 500 GB        | 500 GB        | 240 GB      | 1 TB       | 500 GB | 4 TB      | 2 TB   |
+| **Max Time**   | 2 days    | 7 days        | 7 days        | 7 days      | 7 days     | 2 days | 2 days    | 2 days |
 
 `debug` is an additional utility profile rather than a one with a dedicated partition. It disables automatic cleanup.
 
