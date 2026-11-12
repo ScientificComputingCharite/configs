@@ -20,8 +20,8 @@ This page documents the `charite` Nextflow profile for running Nextflow and nf-c
 - [4. Running Nextflow Workflows on the Charité HPC](#4-running-nextflow-workflows-on-the-charité-hpc)
   - [Option 1: Interactive Session](#option-1-interactive-session)
   - [Option 2: Batch Script](#option-2-batch-script) 
-- [5. Job Assignment Logic, Resource Allocation, GPU Acceleration](#job-assignment-logic-resource-allocation-gpu-acceleration)
-- [6. Known Limitations and Issues](#known-limitations-and-issues)
+- [5. Job Assignment Logic and GPU Acceleration](#5-job-assignment-logic-and-gpu-acceleration)
+- [6. Known Limitations and Issues](#6-known-limitations-and-issues)
 
 ## Contributors and Acknowledgments
 
@@ -51,7 +51,7 @@ This page documents the `charite` Nextflow profile for running Nextflow and nf-c
 - **GPU Queues**: `gpu`,`pgpu`
 - **Additional Profiles**: `dragen_cc05`,`dragen_cc15`,`dragen_gp`,`highmem`,`genomics`
 
-See [Job Assignment Logic, Resource Allocation, GPU Acceleration](#job-assignment-logic-resource-allocation-gpu-acceleration) for more info.
+See [Job Assignment Logic and GPU Acceleration](#5-job-assignment-logic-and-gpu-acceleration) for more info.
 
 - **Usage Examples**:
 
@@ -333,7 +333,7 @@ It is also possible to jump right into an interactive session using the [Open On
 
 > [!NOTE]
 > <details closed>
-> <summary>Click here to reveal the complete variables code snippet for easy copy-pasting</summary>
+> <summary>Click here to copy-paste the complete variables code snippet for your interactive session</summary>
 > 
 > ```bash
 > # Global Utility Variables
@@ -388,8 +388,6 @@ It is also possible to jump right into an interactive session using the [Open On
 > 
 > </details>
 
----
-
 Once in an interactive session, you may choose to copy-paste the code snippet...
 
 1. ...into your terminal. With this method however, you must set the variables again every time you start a new session.
@@ -412,7 +410,7 @@ After saving the below script under `run-nf-core-pipeline.sh`, submit it with `s
 
 > [!NOTE]
 > <details closed>
-> <summary>Click here to reveal the Batch script for easy copy-pasting</summary>
+> <summary>Click here to copy-paste the complete code snippet for your Batch script</summary>
 >
 > ```bash
 > #!/usr/bin/env bash
@@ -490,7 +488,7 @@ After saving the below script under `run-nf-core-pipeline.sh`, submit it with `s
 > 
 > </details>
 
-## 5. Job Assignment Logic, Resource Allocation, GPU Acceleration
+## 5. Job Assignment Logic and GPU Acceleration
 
 > [!NOTE]
 > Max CPUs and Memory refer to the highest possible ceiling from all nodes within a partition (see [Resource Limits](https://nf-co.re/docs/specifications/configs/general#resource-limits)), and not that this is all of the CPUs and Memory available for that partition. For more in-depth information about the number and types of nodes available on the Charité HPC, see the following internal Wiki links:
