@@ -333,6 +333,7 @@ It is also possible to jump right into an interactive session using the [Open On
 
 > [!NOTE]
 > Checklist for working in an interactive session:
+> - Activate Nextflow with `conda activate nf-core-2026-1`
 > - Update the value of `PROB_ABBR` if you have project scratch available to you
 > - (Optional) Uncomment `export NXF_APPTAINER_CACHEDIR="${PROJ_SCRATCHDIR_CHARITE}/apptainer-images"` if you wish to override the default path of the images cache
 > - (Optional) Uncomment `export NXF_SYNTAX_PARSER=v1` if the pipeline you are using is not compatible with the v2 strict parser
@@ -404,7 +405,7 @@ Once in an interactive session, you may choose to copy-paste the code snippet...
 > [!WARNING]
 > Be mindful of what you add into your `~/.bashrc` file, as it may unexpectedly alter the expected behavior of other existing applications.
 
-Then, activate Nextflow with `conda activate nf-core-2026-1` and test a nf-core pipeline:
+Finally, launch your pipeline:
 
 ```
 nextflow run nf-core/demo -profile test,charite --outdir results/demo-test
