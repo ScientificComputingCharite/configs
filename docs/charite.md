@@ -17,7 +17,7 @@ This page documents the `charite` Nextflow profile for running Nextflow and nf-c
     - [3.3.2. Apptainer Image Cache](#332-apptainer-image-cache)
   - [3.4. Nextflow-specific Variables](#34-nextflow-specific-variables)
   - [3.5. Nextflow Strict Syntax](#35-nextflow-strict-syntax)
-  - [3.6. Nextflow Conda Environment](#36-nextflow-conda-environment)
+  - [3.6. Shared Nextflow Conda Environment](#36-shared-nextflow-conda-environment)
 - [4. Running Nextflow Workflows on the Charité HPC](#4-running-nextflow-workflows-on-the-charité-hpc)
   - [4. Option 1: Interactive Session](#option-1-interactive-session)
   - [4. Option 2: Batch Script](#option-2-batch-script) 
@@ -57,11 +57,6 @@ See [Job Assignment Logic, Resource Allocation, GPU Acceleration](#job-assignmen
 - **Usage Examples**:
 
 ```
-# Your own Nextflow Workflow
-nextflow run main.nf -profile charite ...
-```
-
-```
 # nf-core Pipeline
 nextflow run nf-core/<pipeline-name> -profile charite ...
 ```
@@ -71,6 +66,10 @@ nextflow run nf-core/<pipeline-name> -profile charite ...
 # Specifying '-profile test' uses dummy data provided by nf-core for that particular pipeline
 nextflow run nf-core/demo -profile test,charite --outdir results/demo-test
 ```
+
+For the sake of simplicity, this documentation will assume usage of nf-core pipelines. To use this config with a custom Nextflow workflow, see the following links for more info:
+- [Using nf-core/configs outside nf-core](https://nf-co.re/docs/developing/institutional-profiles/outside-nf-core)
+- [Create a Pipeline with nf-core CLI](https://nf-co.re/docs/nf-core-tools/cli/pipelines/create) (nf-core CLI already available within [Shared Nextflow Conda Environment](#36-shared-nextflow-conda-environment))
 
 ## 2. Requesting Charité HPC Access
 
@@ -292,7 +291,7 @@ For additional information, see the [Nextflow environment variable reference](ht
 ### 3.5. Nextflow Strict Syntax
 
 > [!IMPORTANT]
-> **Nextflow v26.04 and later** use the v2 syntax parser by default as part of the transition toward strict syntax.
+> **Nextflow v26.04 and later** uses the v2 syntax parser by default as part of the transition toward strict syntax.
 >
 > Some nf-core pipelines may not yet be fully compatible with the v2 parser. If a pipeline fails due to syntax incompatibilities, you can temporarily switch to the legacy parser:
 >
@@ -304,9 +303,9 @@ For additional information, see the [Nextflow environment variable reference](ht
 >
 > For more information, see the [Nextflow Strict Syntax documentation](https://docs.seqera.io/nextflow/strict-syntax).
 
-### 3.6. Nextflow Conda Environment
+### 3.6. Shared Nextflow Conda Environment
 
-The Conda environment `nf-core-2026-1` is provided by the SC HPC Team, which you can readily use. It contains both the nf-core CLI (`v4.2.0`) as well as Nextflow (`v26.10.4`).
+The Conda environment `nf-core-2026-1` is provided by the SC HPC Team as part of the SC Software offering, which you can readily use. It contains both the nf-core CLI (`v4.2.0`) as well as Nextflow (`v26.10.4`).
 
 ```bash
 conda activate nf-core-2026-1
@@ -488,7 +487,7 @@ After saving the below script under `run-nf-core-pipeline.sh`, submit it with `s
 ## 5. Job Assignment Logic, Resource Allocation, GPU Acceleration
 
 > [!NOTE]
-> Max CPUs and Memory refer to the highest possible ceiling from all nodes within a partition (see [Resource Limits](https://nf-co.re/docs/specifications/configs/general#resource-limits)). For more in-depth information about the number and types of nodes available on the Charité HPC, see the following internal Wiki links:
+> Max CPUs and Memory refer to the highest possible ceiling from all nodes within a partition (see [Resource Limits](https://nf-co.re/docs/specifications/configs/general#resource-limits)), and not that this is all of the CPUs and Memory available for that partition. For more in-depth information about the number and types of nodes available on the Charité HPC, see the following internal Wiki links:
 > - [SLURM Partitions](https://git.bihealth.org/charite-sc-public/sc-wiki/-/wikis/Resources/User%20Documentation/User%20Guide:%20HPC%20@Charite#slurm-partitions)
 > - [SLURM Partition Overview](https://git.bihealth.org/charite-sc-public/sc-wiki/-/wikis/Resources/User%20Documentation/User%20Guide:%20HPC%20@Charite#slurm-partition-overview)
 > - [SLURM Features and GPU Types](https://git.bihealth.org/charite-sc-public/sc-wiki/-/wikis/Resources/User%20Documentation/User%20Guide:%20HPC%20@Charite#slurm-features-and-gpu-types)
