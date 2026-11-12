@@ -10,14 +10,13 @@ This page documents the `charite` Nextflow profile for running Nextflow and nf-c
 - [1. Quick Overview and Usage Examples](#1-quick-overview-and-usage-examples)
 - [2. Requesting Charité HPC Access](#2-requesting-charité-hpc-access)
 - [3. Environment Setup](#3-environment-setup)
-  - [3.1. Redirecting Output to Project Scratch](#31-redirecting-output-to-project-scratch)
-  - [3.2. Global Utility Variables](#32-global-utility-variables)
-  - [3.3. Apptainer-specific Variables](#33-apptainer-specific-variables)
-    - [3.3.1. Apptainer Cache and Temporary Files](#331-apptainer-cache-and-temporary-files)
-    - [3.3.2. Apptainer Image Cache](#332-apptainer-image-cache)
-  - [3.4. Nextflow-specific Variables](#34-nextflow-specific-variables)
-  - [3.5. Nextflow Strict Syntax](#35-nextflow-strict-syntax)
-  - [3.6. Shared Nextflow Conda Environment](#36-shared-nextflow-conda-environment)
+  - [3.1. Global Utility Variables](#31-global-utility-variables)
+  - [3.2. Apptainer-specific Variables](#32-apptainer-specific-variables)
+    - [3.2.1. Apptainer Cache and Temporary Files](#321-apptainer-cache-and-temporary-files)
+    - [3.2.2. Apptainer Image Cache](#322-apptainer-image-cache)
+  - [3.3. Nextflow-specific Variables](#33-nextflow-specific-variables)
+  - [3.4. Nextflow Strict Syntax](#34-nextflow-strict-syntax)
+  - [3.5. Shared Nextflow Conda Environment](#35-shared-nextflow-conda-environment)
 - [4. Running Nextflow Workflows on the Charité HPC](#4-running-nextflow-workflows-on-the-charité-hpc)
   - [Option 1: Interactive Session](#option-1-interactive-session)
   - [Option 2: Batch Script](#option-2-batch-script) 
@@ -84,9 +83,9 @@ The Charité internal user documentation/wiki requires a Charité GitLab account
 >
 > A complete practical example is later provided in the next section, which integrates the exporting of the variables explained together with a run of a nf-core pipeline.
 >
-> [**Click here to skip ahead to 'Running Nextflow Workflows on the Charité HPC'**](#running-nextflow-workflows-on-the-charité-hpc)
+> [**Click here to skip ahead to 'Running Nextflow Workflows on the Charité HPC'**](#4-running-nextflow-workflows-on-the-charité-hpc)
 
-### 3.1. Redirecting Output to Project Scratch
+### 3.1. Global Utility Variables
 
 The Charité HPC profile uses project-specific scratch storage for Nextflow and Apptainer cache and temporary files whenever available. Storage paths are determined automatically based on the `PROJ_ABBR` environment variable:
 
@@ -102,9 +101,6 @@ For more information on managing project and scratch storage, refer to the Chari
 - **Existing project members:** [How to access project and scratch directories](https://git.bihealth.org/charite-sc-public/sc-wiki/-/wikis/Resources/HOWTOs/how-to-access-project-and-scratch-directories)
 - **Users without an assigned project:** [How to apply for project and scratch directories](https://git.bihealth.org/charite-sc-public/sc-wiki/-/wikis/Resources/HOWTOs/how-to-apply-for-project-and-scratch-directories)
 - **Project administrators:** [How to manage project and scratch directories](https://git.bihealth.org/charite-sc-public/sc-wiki/-/wikis/Resources/HOWTOs/how-to-manage-project-and-scratch-directories)
-
-
-### 3.2. Global Utility Variables
 
 ```bash
 # Project abbreviation (leave empty if you don't have one)
@@ -128,7 +124,7 @@ if [[ -z "${PROJ_SCRATCHDIR_CHARITE_USER:-}" ]]; then
 fi
 ```
 
-### 3.3. Apptainer-specific Variables
+### 3.2. Apptainer-specific Variables
 
 | Variable | Purpose | Value |
 |---|---|---|
@@ -140,7 +136,7 @@ Apptainer is readily available on Charité HPC compute nodes and does not requir
 
 The configuration distinguishes between **Apptainer's internal cache and temporary files** and **Nextflow's cached container images**. These are stored separately to allow users to customize image storage without affecting Apptainer's internal operations.
 
-#### 3.3.1. Apptainer Cache and Temporary Files
+#### 3.2.1. Apptainer Cache and Temporary Files
 
 The following environment variables define where Apptainer stores its internal cache and temporary files:
 
@@ -152,7 +148,7 @@ export APPTAINER_TMPDIR="${PROJ_SCRATCHDIR_CHARITE_USER}/.apptainer/tmp"
 mkdir -p "${APPTAINER_TMPDIR}"
 ```
 
-#### 3.3.2. Apptainer Image Cache
+#### 3.2.2. Apptainer Image Cache
 
 The location of built Apptainer container images is managed through through `NXF_APPTAINER_CACHEDIR` and `apptainer.cacheDir`.
 
@@ -238,7 +234,7 @@ flowchart TD
     class E,F path
 ```
 
-### 3.4. Nextflow-specific Variables
+### 3.3. Nextflow-specific Variables
 
 The following environment variables configure Nextflow's home, cache, and temporary directories. By default, these are stored under `${PROJ_SCRATCHDIR_CHARITE_USER}/.nextflow`, keeping Nextflow-generated files outside the limited home directory whenever project scratch space is available.
 
@@ -290,7 +286,7 @@ With an assigned project and the default `NXF_APPTAINER_CACHEDIR`, each user's s
 
 For additional information, see the [Nextflow environment variable reference](https://docs.seqera.io/nextflow/reference/env-vars/#nextflow-settings).
 
-### 3.5. Nextflow Strict Syntax
+### 3.4. Nextflow Strict Syntax
 
 > [!IMPORTANT]
 > **Nextflow v26.04 and later** uses the v2 syntax parser by default as part of the transition toward strict syntax.
@@ -305,7 +301,7 @@ For additional information, see the [Nextflow environment variable reference](ht
 >
 > For more information, see the [Nextflow Strict Syntax documentation](https://docs.seqera.io/nextflow/strict-syntax).
 
-### 3.6. Shared Nextflow Conda Environment
+### 3.5. Shared Nextflow Conda Environment
 
 The Conda environment `nf-core-2026-1` is provided by the SC HPC Team as part of the SC Software offering, which you can readily use. It contains both the nf-core CLI (`v4.2.0`) as well as Nextflow (`v26.10.4`).
 
