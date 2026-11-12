@@ -381,9 +381,11 @@ It is also possible to jump right into an interactive session using the [Open On
 > ## Uncomment the line below, if the pipeline you are using is not compatible with NXF_SYNTAX_PARSER=v2 (default in Nextflow >=26.04) to force the legacy v1 parser
 > ## export NXF_SYNTAX_PARSER=v1
 > 
-> # Define your workspace directory // Adjust as needed
-> MY_NXF_WORKSPACE="${PROJ_SCRATCHDIR_CHARITE}/my-nxf-workspace"
-> cd ${MY_NFCORE_WORKSPACE}
+> # Define your workspace directory (i.e. where output will be saved) // Adjust as needed
+> MY_NXF_WORKSPACE="${PROJ_SCRATCHDIR_CHARITE}/workspace-nf-core"
+>
+> # Navigate to the workspace
+> cd "${MY_NXF_WORKSPACE}"
 > ```
 > 
 > </details>
@@ -406,7 +408,7 @@ nextflow run nf-core/demo -profile test,charite --outdir results/demo-test
 
 First, `ssh` into a frontend node via your terminal as you normally would (see [Access](https://git.bihealth.org/charite-sc-public/sc-wiki/-/wikis/Resources/User-Documentation/User-Guide:-HPC-@Charite#access)).
 
-After saving the below script under `run-nf-core-pipeline.sh`, submit it with `sbatch run-nf-core-pipeline.sh`.
+After saving the below script under `run-nf-core-demo-test.sh`, submit it with `sbatch run-nf-core-demo-test.sh`.
 
 > [!NOTE]
 > <details closed>
@@ -416,10 +418,13 @@ After saving the below script under `run-nf-core-pipeline.sh`, submit it with `s
 > #!/usr/bin/env bash
 > #SBATCH --job-name=run-nf-core-demo-test
 > #SBATCH --partition=compute
+> #SBATCH --qos=normal
 > #SBATCH --ntasks=1
-> #SBATCH --cpus-per-task=4
-> #SBATCH --mem=16G
-> #SBATCH --time=02:00:00
+> #SBATCH --cpus-per-task=2
+> #SBATCH --mem=8G
+> #SBATCH --time=01:00:00
+> #SBATCH --error=slurm/error/%x.%j.err
+> #SBATCH --output=slurm/output/%x.%j.out
 > 
 > # Initialize Conda
 > eval "$(conda shell.bash hook)"
@@ -472,14 +477,16 @@ After saving the below script under `run-nf-core-pipeline.sh`, submit it with `s
 > ## Uncomment the line below, if the pipeline you are using is not compatible with NXF_SYNTAX_PARSER=v2 (default in Nextflow >=26.04) to force the legacy v1 parser
 > ## export NXF_SYNTAX_PARSER=v1
 > 
-> # Define your workspace directory // Adjust as needed
-> MY_NXF_WORKSPACE="${PROJ_SCRATCHDIR_CHARITE}/my-nxf-workspace"
-> cd ${MY_NFCORE_WORKSPACE}
+> # Define your workspace directory (i.e. where output will be saved) // Adjust as needed
+> MY_NXF_WORKSPACE="${PROJ_SCRATCHDIR_CHARITE}/workspace-nf-core"
+>
+> # Navigate to the workspace
+> cd "${MY_NXF_WORKSPACE}"
 > 
 > # Do the work
 > nextflow run nf-core/demo \
 >     -profile test,charite \
->     --outdir results/demo-test
+>     --outdir demo-test-results
 > 
 >     # -r <version> \ # Optional: pin a specific revision of a pipeline
 >     # -resume \ # Optional: resume an interrupted workflow
