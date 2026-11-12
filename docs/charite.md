@@ -7,20 +7,22 @@ This page documents the `charite` Nextflow profile for running Nextflow and nf-c
 ## Table of Contents
 
 - [Contributors and Acknowledgments](#contributors-and-acknowledgments)
-- [Quick Overview and Usage Examples](#quick-overview-and-usage-examples)
-- [Requesting Charité HPC Access](#requesting-hpc-access)
-- [Environment Setup](#environment-setup)
-  - [Redirecting Output to Project Scratch](#redirecting-output-to-project-scratch)
-  - [Global Utility Variables](#global-utility-variables)
-  - [Apptainer-specific Variables](#apptainer-specific-variables)
-  - [Nextflow-specific Variables](#nextflow-specific-variables)
-  - [Nextflow Strict Syntax](#nextflow-strict-syntax)
-  - [Nextflow Conda Environment](#nextflow-conda-environment)
-- [Running Nextflow Workflows on the Charité HPC](#running-nextflow-workflows-on-the-charité-hpc)
-  - [Option 1: Interactive Session](#option-1-interactive-session)
-  - [Option 2: Batch Script](#option-2-batch-script) 
-- [Job Assignment Logic, Resource Allocation, GPU Acceleration](#job-assignment-logic-resource-allocation-gpu-acceleration)
-- [Known Limitations and Issues](#known-limitations-and-issues)
+- [1. Quick Overview and Usage Examples](#1-quick-overview-and-usage-examples)
+- [2. Requesting Charité HPC Access](#2-requesting-hpc-access)
+- [3. Environment Setup](#3-environment-setup)
+  - [3.1. Redirecting Output to Project Scratch](#31-redirecting-output-to-project-scratch)
+  - [3.2. Global Utility Variables](#32-global-utility-variables)
+  - [3.3. Apptainer-specific Variables](#33-apptainer-specific-variables)
+    - [3.3.1. Apptainer Cache and Temporary Files](#331-apptainer-cache-and-temporary-files)
+    - [3.3.2. Apptainer Image Cache](#332-apptainer-image-cache)
+  - [3.4. Nextflow-specific Variables](#34-nextflow-specific-variables)
+  - [3.5. Nextflow Strict Syntax](#35-nextflow-strict-syntax)
+  - [3.6. Nextflow Conda Environment](#36-nextflow-conda-environment)
+- [4. Running Nextflow Workflows on the Charité HPC](#4-running-nextflow-workflows-on-the-charité-hpc)
+  - [4. Option 1: Interactive Session](#option-1-interactive-session)
+  - [4. Option 2: Batch Script](#option-2-batch-script) 
+- [5. Job Assignment Logic, Resource Allocation, GPU Acceleration](#job-assignment-logic-resource-allocation-gpu-acceleration)
+- [6. Known Limitations and Issues](#known-limitations-and-issues)
 
 ## Contributors and Acknowledgments
 
@@ -37,7 +39,7 @@ This page documents the `charite` Nextflow profile for running Nextflow and nf-c
     - Cornelius Fischer ([@cofischer](https://github.com/cofischer))
     - Namuun Battur ([@NmnBttr](https://github.com/NmnBttr))
 
-## Quick Overview and Usage Examples
+## 1. Quick Overview and Usage Examples
 
 - **Scheduler**: SLURM
 - **Container Engine**: Apptainer
@@ -70,13 +72,13 @@ nextflow run nf-core/<pipeline-name> -profile charite ...
 nextflow run nf-core/demo -profile test,charite --outdir results/demo-test
 ```
 
-## Requesting Charité HPC Access
+## 2. Requesting Charité HPC Access
 
 The Charité internal user documentation/wiki requires a Charité GitLab account. To request access:
 1. Email sc-hpc-helpdesk@charite.de to request access to the Charité HPC. This initiates the onboarding process.
 2. If you do not have access to [git.bihealth.org](https://git.bihealth.org/), contact health-data@charite.de to request GitLab access for the [Charité HPC User Documentation and Onboarding Guide](https://git.bihealth.org/charite-sc-public/sc-wiki/-/wikis/home).
 
-## Environment Setup
+## 3. Environment Setup
 
 > [!NOTE]
 > In order for the config to work as intended, some environment variables must first be exported before running any workflow. This section provides a detailed overview of those variables.
@@ -85,7 +87,7 @@ The Charité internal user documentation/wiki requires a Charité GitLab account
 >
 > [**Click here to skip ahead to 'Running Nextflow Workflows on the Charité HPC'**](#running-nextflow-workflows-on-the-charité-hpc)
 
-### Redirecting Output to Project Scratch
+### 3.1. Redirecting Output to Project Scratch
 
 The Charité HPC profile uses project-specific scratch storage for Nextflow and Apptainer cache and temporary files whenever available. Storage paths are determined automatically based on the `PROJ_ABBR` environment variable:
 
@@ -103,7 +105,7 @@ For more information on managing project and scratch storage, refer to the Chari
 - **Project administrators:** [How to manage project and scratch directories](https://git.bihealth.org/charite-sc-public/sc-wiki/-/wikis/Resources/HOWTOs/how-to-manage-project-and-scratch-directories)
 
 
-### Global Utility Variables
+### 3.2. Global Utility Variables
 
 ```bash
 # Project abbreviation (leave empty if you don't have one)
@@ -127,7 +129,7 @@ if [[ -z "${PROJ_SCRATCHDIR_CHARITE_USER:-}" ]]; then
 fi
 ```
 
-### Apptainer-specific Variables
+### 3.3. Apptainer-specific Variables
 
 | Variable | Purpose | Value |
 |---|---|---|
@@ -139,7 +141,7 @@ Apptainer is readily available on Charité HPC compute nodes and does not requir
 
 The configuration distinguishes between **Apptainer's internal cache and temporary files** and **Nextflow's cached container images**. These are stored separately to allow users to customize image storage without affecting Apptainer's internal operations.
 
-#### Apptainer Cache and Temporary Files
+#### 3.3.1. Apptainer Cache and Temporary Files
 
 The following environment variables define where Apptainer stores its internal cache and temporary files:
 
@@ -151,7 +153,7 @@ export APPTAINER_TMPDIR="${PROJ_SCRATCHDIR_CHARITE_USER}/.apptainer/tmp"
 mkdir -p "${APPTAINER_TMPDIR}"
 ```
 
-#### Container Image Cache
+#### 3.3.2. Apptainer Image Cache
 
 The location of built Apptainer container images is managed through through `NXF_APPTAINER_CACHEDIR` and `apptainer.cacheDir`.
 
@@ -235,7 +237,7 @@ flowchart TD
     class E,F path
 ```
 
-### Nextflow-specific Variables
+### 3.4. Nextflow-specific Variables
 
 The following environment variables configure Nextflow's home, cache, and temporary directories. By default, these are stored under `${PROJ_SCRATCHDIR_CHARITE_USER}/.nextflow`, keeping Nextflow-generated files outside the limited home directory whenever project scratch space is available.
 
@@ -259,8 +261,6 @@ export NXF_OPTS="-Xms1g -Xmx4g"
 ```
 
 The JVM memory settings follow [nf-core recommendations](https://nf-co.re/docs/usage/getting_started/installation) to prevent Nextflow from consuming excessive memory.
-
-#### Resulting Directory Structure
 
 With an assigned project and the default `NXF_APPTAINER_CACHEDIR`, each user's scratch directory contains their Nextflow and Apptainer files:
 
@@ -289,7 +289,7 @@ With an assigned project and the default `NXF_APPTAINER_CACHEDIR`, each user's s
 
 For additional information, see the [Nextflow environment variable reference](https://docs.seqera.io/nextflow/reference/env-vars/#nextflow-settings).
 
-### Nextflow Strict Syntax
+### 3.5. Nextflow Strict Syntax
 
 > [!IMPORTANT]
 > **Nextflow v26.04 and later** use the v2 syntax parser by default as part of the transition toward strict syntax.
@@ -304,7 +304,7 @@ For additional information, see the [Nextflow environment variable reference](ht
 >
 > For more information, see the [Nextflow Strict Syntax documentation](https://docs.seqera.io/nextflow/strict-syntax).
 
-### Nextflow Conda Environment
+### 3.6. Nextflow Conda Environment
 
 The Conda environment `nf-core-2026-1` is provided by the SC HPC Team, which you can readily use. It contains both the nf-core CLI (`v4.2.0`) as well as Nextflow (`v26.10.4`).
 
@@ -312,12 +312,12 @@ The Conda environment `nf-core-2026-1` is provided by the SC HPC Team, which you
 conda activate nf-core-2026-1
 ```
 
-## Running Nextflow Workflows on the Charité HPC
+## 4. Running Nextflow Workflows on the Charité HPC
 
 > [!CAUTION]
 > Do not attempt to start resource-heavy jobs on frontend nodes. The memory on the frontends is restricted to **1 GB** per user. Your session will get killed (see [Frontend Memory Restrictions](https://git.bihealth.org/charite-sc-public/sc-wiki/-/wikis/faq/frontend-restrictions)). It is therefore recommended to either work in an interactive session or submit your jobs via Batch scripts.
 
-### Option 1: Interactive Session
+### 4. Option 1: Interactive Session
 
 #### Interactive Session via `srun`
 
@@ -399,7 +399,7 @@ Once in an interactive session, you may choose to copy-paste the code snippet...
 > [!WARNING]
 > Be mindful of what you add into your `~/.bashrc` file, as it may unexpectedly alter the expected behavior of other existing applications.
 
-### Option 2: Batch Script
+### 4. Option 2: Batch Script
 
 First, `ssh` into a frontend node via your terminal as you normally would (see [Access](https://git.bihealth.org/charite-sc-public/sc-wiki/-/wikis/Resources/User-Documentation/User-Guide:-HPC-@Charite#access)).
 
@@ -485,7 +485,7 @@ After saving the below script under `run-nf-core-pipeline.sh`, submit it with `s
 > 
 > </details>
 
-## Job Assignment Logic, Resource Allocation, GPU Acceleration
+## 5. Job Assignment Logic, Resource Allocation, GPU Acceleration
 
 > [!NOTE]
 > Max CPUs and Memory refer to the highest possible ceiling from all nodes within a partition (see [Resource Limits](https://nf-co.re/docs/specifications/configs/general#resource-limits)). For more in-depth information about the number and types of nodes available on the Charité HPC, see the following internal Wiki links:
@@ -594,7 +594,7 @@ Picture above is the logic that the config follows to determine to which partiti
 > ```
 >  The last example shown is how you should correctly test pipelines with the `test` dataset provided by nf-core.
 
-## Known Limitations and Issues
+## 6. Known Limitations and Issues
 
 ### Jobs Pending in `gpu` Partition
 
