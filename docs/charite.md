@@ -19,8 +19,8 @@ This page documents the `charite` Nextflow profile for running Nextflow and nf-c
   - [3.5. Nextflow Strict Syntax](#35-nextflow-strict-syntax)
   - [3.6. Shared Nextflow Conda Environment](#36-shared-nextflow-conda-environment)
 - [4. Running Nextflow Workflows on the Charité HPC](#4-running-nextflow-workflows-on-the-charité-hpc)
-  - [4. Option 1: Interactive Session](#option-1-interactive-session)
-  - [4. Option 2: Batch Script](#option-2-batch-script) 
+  - [Option 1: Interactive Session](#option-1-interactive-session)
+  - [Option 2: Batch Script](#option-2-batch-script) 
 - [5. Job Assignment Logic, Resource Allocation, GPU Acceleration](#job-assignment-logic-resource-allocation-gpu-acceleration)
 - [6. Known Limitations and Issues](#known-limitations-and-issues)
 
@@ -180,6 +180,7 @@ The resulting default structure looks like this:
 │   │   ├── cache/
 │   │   └── tmp/
 │   └── apptainer-images/
+...
 ```
 
 Users can optionally override this location like so:
@@ -199,9 +200,10 @@ For projects with multiple collaborators, container images can be stored in a sh
 │       ├── cache/
 │       └── tmp/
 └── user2/
-    └── .apptainer/
-        ├── cache/
-        └── tmp/
+│   └── .apptainer/
+│       ├── cache/
+│       └── tmp/
+...
 ```
 
 **Note:** Shared image directories require appropriate read/write permissions. Collaborators should coordinate access and avoid modifying or deleting images that others may be using. Please discuss this with your team.
@@ -251,8 +253,8 @@ The following environment variables configure Nextflow's home, cache, and tempor
 ```bash
 # Nextflow home, cache, and temporary directories
 export NXF_HOME="${PROJ_SCRATCHDIR_CHARITE_USER}/.nextflow"
-export NXF_CACHE_DIR="${NXF_HOME}"
-export NXF_TEMP="${NXF_HOME}/tmp"
+export NXF_CACHE_DIR="${PROJ_SCRATCHDIR_CHARITE_USER}/.nextflow"
+export NXF_TEMP="${PROJ_SCRATCHDIR_CHARITE_USER}/.nextflow/tmp"
 mkdir -p "${NXF_TEMP}"
 
 # Limit memory allocation for the Nextflow JVM
@@ -316,7 +318,7 @@ conda activate nf-core-2026-1
 > [!CAUTION]
 > Do not attempt to start resource-heavy jobs on frontend nodes. The memory on the frontends is restricted to **1 GB** per user. Your session will get killed (see [Frontend Memory Restrictions](https://git.bihealth.org/charite-sc-public/sc-wiki/-/wikis/faq/frontend-restrictions)). It is therefore recommended to either work in an interactive session or submit your jobs via Batch scripts.
 
-### 4. Option 1: Interactive Session
+### Option 1: Interactive Session
 
 #### Interactive Session via `srun`
 
@@ -331,13 +333,15 @@ srun --job-name=run-nf-core --partition=compute --ntasks=1 --cpus-per-task=4 --m
 
 It is also possible to jump right into an interactive session using the [Open OnDemand Portal](https://s-sc-ood.charite.de/pun/sys/dashboard/batch_connect/sessions) ([Open OnDemand Wiki](https://git.bihealth.org/charite-sc-public/sc-wiki/-/wikis/Resources/User-Documentation/User-Guide:-HPC-@Charite#open-ondemand)). You must be connected the Charité network to use this, either via Ethernet cable or [OpenVPN Connect](https://git.bihealth.org/charite-sc-public/sc-wiki/-/wikis/Resources/User-Documentation/User-Guide:-HPC-@Charite#connection-to-the-cluster-from-outside-the-charite-network-over-vpn).
 
+----
+
 > [!NOTE]
 > <details closed>
 > <summary>Click here to reveal the complete variables code snippet for easy copy-pasting</summary>
 > 
 > ```bash
-> # 1. Global Utility Variables
-> # Project abbreviation (leave empty if you don't have one)
+> # Global Utility Variables
+> ## Project abbreviation (leave empty if you don't have one)
 > export PROJ_ABBR=""
 > if [[ -n "${PROJ_ABBR}" ]]; then
 >     export PROJ_SCRATCHDIR_CHARITE="/sc-scratch/sc-scratch-${PROJ_ABBR}"
@@ -357,29 +361,29 @@ It is also possible to jump right into an interactive session using the [Open On
 >     exit 1
 > fi
 > 
-> # 2. Apptainer-specific Variables
-> # Control where Apptainer stores cached data and temporary working files
+> # Apptainer-specific Variables
+> # Apptainer cache and temporary files (user-specific)
 > export APPTAINER_CACHEDIR="${PROJ_SCRATCHDIR_CHARITE_USER}/.apptainer"
 > export APPTAINER_TMPDIR="${PROJ_SCRATCHDIR_CHARITE_USER}/.apptainer/tmp"
-> mkdir -p "${APPTAINER_TMPDIR}" # otherwise Nextflow launch fails
+> mkdir -p "${APPTAINER_TMPDIR}"
 > 
-> # Optional: uncomment the line below if you wish to override the default profile path where Apptainer images will be stored
-> # Example path provided assigns a shared location for all collaborators of a project. Change as needed
-> # export NXF_APPTAINER_CACHEDIR="${PROJ_SCRATCHDIR_CHARITE}/apptainer-images"
+> ## Optional: uncomment the line below if you wish to override the default profile path where Apptainer images will be stored
+> ## Example path provided assigns a shared location for all collaborators of a project. Change as needed
+> ## export NXF_APPTAINER_CACHEDIR="${PROJ_SCRATCHDIR_CHARITE}/apptainer-images"
 > 
-> # 3. Nextflow-specific Variables
-> # Nextflow home, cache, and temporary directories
+> # Nextflow-specific Variables
+> ## Nextflow home, cache, and temporary directories
 > export NXF_HOME="${PROJ_SCRATCHDIR_CHARITE_USER}/.nextflow"
-> export NXF_CACHE_DIR="${NXF_HOME}"
-> export NXF_TEMP="${NXF_HOME}/tmp"
+> export NXF_CACHE_DIR="${PROJ_SCRATCHDIR_CHARITE_USER}/.nextflow"
+> export NXF_TEMP="${PROJ_SCRATCHDIR_CHARITE_USER}/.nextflow/tmp"
 > mkdir -p "${NXF_TEMP}"
 > 
-> # Limit memory allocation for the Nextflow JVM
+> ## Limit memory allocation for the Nextflow JVM
 > export NXF_OPTS="-Xms1g -Xmx4g"
 > 
-> # Temporary workaround for Nextflow strict syntax
-> # Uncomment the line below, if the pipeline you are using is not compatible with NXF_SYNTAX_PARSER=v2 (default in Nextflow >=26.04)
-> # export NXF_SYNTAX_PARSER=v1
+> ## Optional: Temporary workaround for Nextflow strict syntax
+> ## Uncomment the line below, if the pipeline you are using is not compatible with NXF_SYNTAX_PARSER=v2 (default in Nextflow >=26.04) to force the legacy v1 parser
+> ## export NXF_SYNTAX_PARSER=v1
 > 
 > # Define your workspace directory // Adjust as needed
 > MY_NXF_WORKSPACE="${PROJ_SCRATCHDIR_CHARITE}/my-nxf-workspace"
@@ -398,7 +402,13 @@ Once in an interactive session, you may choose to copy-paste the code snippet...
 > [!WARNING]
 > Be mindful of what you add into your `~/.bashrc` file, as it may unexpectedly alter the expected behavior of other existing applications.
 
-### 4. Option 2: Batch Script
+Then, activate Nextflow with `conda activate nf-core-2026-1` and test a nf-core pipeline:
+
+```
+nextflow run nf-core/demo -profile test,charite --outdir results/demo-test
+```
+
+### Option 2: Batch Script
 
 First, `ssh` into a frontend node via your terminal as you normally would (see [Access](https://git.bihealth.org/charite-sc-public/sc-wiki/-/wikis/Resources/User-Documentation/User-Guide:-HPC-@Charite#access)).
 
@@ -410,21 +420,21 @@ After saving the below script under `run-nf-core-pipeline.sh`, submit it with `s
 >
 > ```bash
 > #!/usr/bin/env bash
-> #SBATCH --job-name=run-nf-core-<pipeline>
+> #SBATCH --job-name=run-nf-core-demo-test
 > #SBATCH --partition=compute
 > #SBATCH --ntasks=1
 > #SBATCH --cpus-per-task=4
 > #SBATCH --mem=16G
 > #SBATCH --time=02:00:00
 > 
-> # Activate Conda & Nextflow
-> set +e
-> source /etc/profile.d/conda.sh
-> conda activate nf-core-2026-1
-> set -e
+> # Initialize Conda
+> eval "$(conda shell.bash hook)"
 > 
-> # 1. Global Utility Variables
-> # Project abbreviation (leave empty if you don't have one)
+> # Activate the environment
+> conda activate nf-core-2026-1
+> 
+> # Global Utility Variables
+> ## Project abbreviation (leave empty if you don't have one)
 > export PROJ_ABBR=""
 > if [[ -n "${PROJ_ABBR}" ]]; then
 >     export PROJ_SCRATCHDIR_CHARITE="/sc-scratch/sc-scratch-${PROJ_ABBR}"
@@ -444,29 +454,29 @@ After saving the below script under `run-nf-core-pipeline.sh`, submit it with `s
 >     exit 1
 > fi
 > 
-> # 2. Apptainer-specific Variables
-> # Control where Apptainer stores cached data and temporary working files
+> # Apptainer-specific Variables
+> # Apptainer cache and temporary files (user-specific)
 > export APPTAINER_CACHEDIR="${PROJ_SCRATCHDIR_CHARITE_USER}/.apptainer"
 > export APPTAINER_TMPDIR="${PROJ_SCRATCHDIR_CHARITE_USER}/.apptainer/tmp"
-> mkdir -p "${APPTAINER_TMPDIR}" # otherwise Nextflow launch fails
+> mkdir -p "${APPTAINER_TMPDIR}"
 > 
-> # Optional: uncomment the line below if you wish to override the default profile path where Apptainer images will be stored
-> # Example path provided assigns a shared location for all collaborators of a project. Change as needed
-> # export NXF_APPTAINER_CACHEDIR="${PROJ_SCRATCHDIR_CHARITE}/apptainer-images"
+> ## Optional: uncomment the line below if you wish to override the default profile path where Apptainer images will be stored
+> ## Example path provided assigns a shared location for all collaborators of a project. Change as needed
+> ## export NXF_APPTAINER_CACHEDIR="${PROJ_SCRATCHDIR_CHARITE}/apptainer-images"
 > 
-> # 3. Nextflow-specific Variables
-> # Nextflow home, cache, and temporary directories
+> # Nextflow-specific Variables
+> ## Nextflow home, cache, and temporary directories
 > export NXF_HOME="${PROJ_SCRATCHDIR_CHARITE_USER}/.nextflow"
-> export NXF_CACHE_DIR="${NXF_HOME}"
-> export NXF_TEMP="${NXF_HOME}/tmp"
+> export NXF_CACHE_DIR="${PROJ_SCRATCHDIR_CHARITE_USER}/.nextflow"
+> export NXF_TEMP="${PROJ_SCRATCHDIR_CHARITE_USER}/.nextflow/tmp"
 > mkdir -p "${NXF_TEMP}"
 > 
-> # Limit memory allocation for the Nextflow JVM
+> ## Limit memory allocation for the Nextflow JVM
 > export NXF_OPTS="-Xms1g -Xmx4g"
 > 
-> # Temporary workaround for Nextflow strict syntax
-> # Uncomment the line below, if the pipeline you are using is not compatible with NXF_SYNTAX_PARSER=v2 (default in Nextflow >=26.04)
-> # export NXF_SYNTAX_PARSER=v1
+> ## Optional: Temporary workaround for Nextflow strict syntax
+> ## Uncomment the line below, if the pipeline you are using is not compatible with NXF_SYNTAX_PARSER=v2 (default in Nextflow >=26.04) to force the legacy v1 parser
+> ## export NXF_SYNTAX_PARSER=v1
 > 
 > # Define your workspace directory // Adjust as needed
 > MY_NXF_WORKSPACE="${PROJ_SCRATCHDIR_CHARITE}/my-nxf-workspace"
@@ -491,13 +501,12 @@ After saving the below script under `run-nf-core-pipeline.sh`, submit it with `s
 > - [SLURM Partitions](https://git.bihealth.org/charite-sc-public/sc-wiki/-/wikis/Resources/User%20Documentation/User%20Guide:%20HPC%20@Charite#slurm-partitions)
 > - [SLURM Partition Overview](https://git.bihealth.org/charite-sc-public/sc-wiki/-/wikis/Resources/User%20Documentation/User%20Guide:%20HPC%20@Charite#slurm-partition-overview)
 > - [SLURM Features and GPU Types](https://git.bihealth.org/charite-sc-public/sc-wiki/-/wikis/Resources/User%20Documentation/User%20Guide:%20HPC%20@Charite#slurm-features-and-gpu-types)
-> 
 
-| Queue     | `compute` | `dragen_cc05` | `dragen_cc15` | `dragen_gp` | `genomics` | `highmem`  | `gpu`     | `pgpu` |
-| :-------------:        | :-------: | :-----------: | :-----------: | :---------: | :--------: | :--------: | :-------: | :----: |
-| **Max CPUs**          | 192       | 64            | 64            | 48          | 192        | 192        | 64        | 128    |
-| **Max Memory**        | 1 TB      | 500 GB        | 500 GB        | 240 GB      | 1 TB       | 4 TB       | 500 GB    | 2 TB   |
-| **Max Time**          | 2 days    | 7 days        | 7 days        | 7 days      | 7 days     | 2 days     | 2 days    | 2 days |
+| Queue           | `compute` | `dragen_cc05` | `dragen_cc15` | `dragen_gp` | `genomics` | `highmem`  | `gpu`     | `pgpu` |
+| :-------------: | :-------: | :-----------: | :-----------: | :---------: | :--------: | :--------: | :-------: | :----: |
+| **Max CPUs**    | 192       | 64            | 64            | 48          | 192        | 192        | 64        | 128    |
+| **Max Memory**  | 1 TB      | 500 GB        | 500 GB        | 240 GB      | 1 TB       | 4 TB       | 500 GB    | 2 TB   |
+| **Max Time**      2 days    | 7 days        | 7 days        | 7 days      | 7 days     | 2 days     | 2 days    | 2 days |
 
 ```mermaid
 ---
@@ -574,8 +583,6 @@ flowchart TB
 ```
 
 Picture above is the logic that the config follows to determine to which partition SLURM should submit a job to. Regardless of the profile(s) chosen, jobs that can benefit from GPU acceleration will be handled accordingly and submitted either to `gpu` or `pgpu`, depending on how many GPUs are requested, thanks to the [`withLabel:process_gpu`](https://github.com/ScientificComputingCharite/configs/blob/94d14de3345ff93199bf195608ba955321426f8d/conf/charite.config#L38) specification in [`conf/charite.config`](../conf/charite.config).
-
-
 
 > [!IMPORTANT]
 >
