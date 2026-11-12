@@ -126,11 +126,11 @@ fi
 
 ### 3.2. Apptainer-specific Variables
 
-| Variable | Purpose | Value |
-|---|---|---|
-| `APPTAINER_CACHEDIR` | Cache used internally by Apptainer when downloading and building images | `${PROJ_SCRATCHDIR_CHARITE_USER}/.apptainer` |
-| `APPTAINER_TMPDIR` | Temporary files generated during image creation | `${PROJ_SCRATCHDIR_CHARITE_USER}/.apptainer/tmp` |
-| `NXF_APPTAINER_CACHEDIR` (Nextflow equivalent `apptainer.cacheDir`)| Location of built Apptainer images | `${PROJ_SCRATCHDIR_CHARITE_USER}/apptainer-images` |
+| Variable                                                           | Purpose                                                                 | Value                                              |
+| :---------------------------------------------------------------:  | :---------------------------------------------------------------------: | :------------------------------------------------: |
+| `APPTAINER_CACHEDIR`                                               | Cache used internally by Apptainer when downloading and building images | `${PROJ_SCRATCHDIR_CHARITE_USER}/.apptainer`       |
+| `APPTAINER_TMPDIR`                                                 | Temporary files generated during image creation                         | `${PROJ_SCRATCHDIR_CHARITE_USER}/.apptainer/tmp`   |
+| `NXF_APPTAINER_CACHEDIR` (Nextflow equivalent `apptainer.cacheDir`)| Location of built Apptainer images                                      | `${PROJ_SCRATCHDIR_CHARITE_USER}/apptainer-images` |
 
 Apptainer is readily available on Charité HPC compute nodes and does not require loading a module.
 
@@ -238,13 +238,13 @@ flowchart TD
 
 The following environment variables configure Nextflow's home, cache, and temporary directories. By default, these are stored under `${PROJ_SCRATCHDIR_CHARITE_USER}/.nextflow`, keeping Nextflow-generated files outside the limited home directory whenever project scratch space is available.
 
-| Variable | Purpose | Value |
-| :--- | :--- | :--- |
-| `NXF_HOME` | Nextflow home directory (configuration, plugins, and other internal files) | `${PROJ_SCRATCHDIR_CHARITE_USER}/.nextflow` |
-| `NXF_CACHE_DIR` | Nextflow's execution cache, used for task metadata and workflow resumption (`-resume`) | `${PROJ_SCRATCHDIR_CHARITE_USER}` |
-| `NXF_TEMP` | Temporary directory used by Nextflow | `${PROJ_SCRATCHDIR_CHARITE_USER}/tmp` |
-| `NXF_OPTS` | JVM memory settings for the Nextflow launcher | `-Xms1g -Xmx4g` |
-| `NXF_WORK` | Nextflow working directory for task execution, managed automatically by `charite.config` | Configured via `workDir` in `charite.config` |
+| Variable        | Purpose                                                                                  | Value                                        |
+| :-------------: | :-------------------------------------------------------------------------------------:  | :----------------------------------------:   |
+| `NXF_HOME`      | Nextflow home directory (configuration, plugins, and other internal files)               | `${PROJ_SCRATCHDIR_CHARITE_USER}/.nextflow`  |
+| `NXF_CACHE_DIR` | Nextflow's execution cache, used for task metadata and workflow resumption (`-resume`)   | `${PROJ_SCRATCHDIR_CHARITE_USER}`            |
+| `NXF_TEMP`      | Temporary directory used by Nextflow                                                     | `${PROJ_SCRATCHDIR_CHARITE_USER}/tmp`        |
+| `NXF_OPTS`      | JVM memory settings for the Nextflow launcher                                            | `-Xms1g -Xmx4g`                              |
+| `NXF_WORK`      | Nextflow working directory for task execution, managed automatically by `charite.config` | Configured via `workDir` in `charite.config` |
 
 ```bash
 # Nextflow home, cache, and temporary directories
@@ -318,7 +318,7 @@ conda activate nf-core-2026-1
 
 #### Interactive Session via `srun`
 
-First, `ssh` into a frontend node via your terminal as you normally would (see [Access](https://git.bihealth.org/charite-sc-public/sc-wiki/-/wikis/Resources/User-Documentation/User-Guide:-HPC-@Charite#access)).
+First, `ssh` into a frontend node via your terminal as you normally would (see [Access](https://git.bihealth.org/charite-sc-public/sc-wiki/-/wikis/Resources/User-Documentation/User-Guide:-HPC-@Charite#access)), then:
 
 ```bash
 # Interactive sessions launched with srun are capped at 8 hours runtime
@@ -332,6 +332,12 @@ It is also possible to jump right into an interactive session using the [Open On
 ----
 
 > [!NOTE]
+> Checklist for working in an interactive session:
+> - Update the value of `PROB_ABBR` if you have project scratch available to you
+> - (Optional) Uncomment `export NXF_APPTAINER_CACHEDIR="${PROJ_SCRATCHDIR_CHARITE}/apptainer-images"` if you wish to override the default path of the images cache
+> - (Optional) Uncomment `export NXF_SYNTAX_PARSER=v1` if the pipeline you are using is not compatible with the v2 strict parser
+> - Update the path to your workspace via `MY_NXF_WORKSPACE`
+>
 > <details closed>
 > <summary>Click here to copy-paste the complete variables code snippet for your interactive session</summary>
 > 
@@ -382,7 +388,7 @@ It is also possible to jump right into an interactive session using the [Open On
 > ## export NXF_SYNTAX_PARSER=v1
 > 
 > # Define your workspace directory (i.e. where output will be saved) // Adjust as needed
-> MY_NXF_WORKSPACE="${PROJ_SCRATCHDIR_CHARITE}/workspace-nf-core"
+> MY_NXF_WORKSPACE="${PROJ_SCRATCHDIR_CHARITE_USER}/nxf-workspace"
 >
 > # Navigate to the workspace
 > cd "${MY_NXF_WORKSPACE}"
@@ -411,6 +417,13 @@ First, `ssh` into a frontend node via your terminal as you normally would (see [
 After saving the below script under `run-nf-core-demo-test.sh`, submit it with `sbatch run-nf-core-demo-test.sh`.
 
 > [!NOTE]
+> Checklist for working with a Batch script:
+> - Update `#SBATCH --time` to expected runtime of your pipeline (e.g. for a big dataset, consider setting to `12:00:00` or `1-00:00:00`)
+> - (Optional) Add `#SBATCH --mail-user=<your-email>` and `#SBATCH --mail-type=ALL` to get status update notifications
+> - Update the value of `PROB_ABBR` if you have project scratch available to you
+> - (Optional) Uncomment `export NXF_APPTAINER_CACHEDIR="${PROJ_SCRATCHDIR_CHARITE}/apptainer-images"` if you wish to override the default path of the images cache
+> - (Optional) Uncomment `export NXF_SYNTAX_PARSER=v1` if the pipeline you are using is not compatible with the v2 strict parser
+> - Update the path to your workspace via `MY_NXF_WORKSPACE`
 > <details closed>
 > <summary>Click here to copy-paste the complete code snippet for your Batch script</summary>
 >
@@ -478,7 +491,7 @@ After saving the below script under `run-nf-core-demo-test.sh`, submit it with `
 > ## export NXF_SYNTAX_PARSER=v1
 > 
 > # Define your workspace directory (i.e. where output will be saved) // Adjust as needed
-> MY_NXF_WORKSPACE="${PROJ_SCRATCHDIR_CHARITE}/workspace-nf-core"
+> MY_NXF_WORKSPACE="${PROJ_SCRATCHDIR_CHARITE_USER}/nxf-workspace"
 >
 > # Navigate to the workspace
 > cd "${MY_NXF_WORKSPACE}"
