@@ -129,7 +129,7 @@ fi
 
 ### Apptainer-specific Variables
 
-| Variable | Purpose | Location |
+| Variable | Purpose | Value |
 |---|---|---|
 | `APPTAINER_CACHEDIR` | Cache used internally by Apptainer when downloading and building images | `${PROJ_SCRATCHDIR_CHARITE_USER}/.apptainer` |
 | `APPTAINER_TMPDIR` | Temporary files generated during image creation | `${PROJ_SCRATCHDIR_CHARITE_USER}/.apptainer/tmp` |
@@ -237,55 +237,72 @@ flowchart TD
 
 ### Nextflow-specific Variables
 
-See [Nextflow Settings](https://docs.seqera.io/nextflow/reference/env-vars/#nextflow-settings) for more info.
+The following environment variables configure Nextflow's home, cache, and temporary directories. By default, these are stored under `${PROJ_SCRATCHDIR_CHARITE_USER}/.nextflow`, keeping Nextflow-generated files outside the limited home directory whenever project scratch space is available.
+
+| Variable | Purpose | Value |
+| :--- | :--- | :--- |
+| `NXF_HOME` | Nextflow home directory (configuration, plugins, and other internal files) | `${PROJ_SCRATCHDIR_CHARITE_USER}/.nextflow` |
+| `NXF_CACHE_DIR` | Nextflow's execution cache, used for task metadata and workflow resumption (`-resume`) | `${PROJ_SCRATCHDIR_CHARITE_USER}` |
+| `NXF_TEMP` | Temporary directory used by Nextflow | `${PROJ_SCRATCHDIR_CHARITE_USER}/tmp` |
+| `NXF_OPTS` | JVM memory settings for the Nextflow launcher | `-Xms1g -Xmx4g` |
+| `NXF_WORK` | Nextflow working directory for task execution, managed automatically by `charite.config` | Configured via `workDir` in `charite.config` |
 
 ```bash
-# Nextflow-specific Variables
-# Centralize Nextflow home, cache and temp into one directory
+# Nextflow home, cache, and temporary directories
 export NXF_HOME="${PROJ_SCRATCHDIR_CHARITE_USER}/.nextflow"
 export NXF_CACHE_DIR="${NXF_HOME}"
 export NXF_TEMP="${NXF_HOME}/tmp"
-mkdir -p ${NXF_TEMP}
-# According to nf-core:
-# "In some cases, the Nextflow Java virtual machines can start to request a large amount of memory.
-# We recommend adding the following line to your environment to limit this."
+mkdir -p "${NXF_TEMP}"
+
+# Limit memory allocation for the Nextflow JVM
 export NXF_OPTS="-Xms1g -Xmx4g"
-# NXF_WORK is handled by the config
 ```
 
-Your folder structure should now look like this, assuming default assignment of `NXF_APPTAINER_CACHEDIR`:
+The JVM memory settings follow [nf-core recommendations](https://nf-co.re/docs/usage/getting_started/installation) to prevent Nextflow from consuming excessive memory.
 
-```bash
+#### Resulting Directory Structure
+
+With an assigned project and the default `NXF_APPTAINER_CACHEDIR`, each user's scratch directory contains their Nextflow and Apptainer files:
+
+```text
 /sc-scratch/sc-scratch-${PROJ_ABBR}/
 ├── user1/
 │   ├── .apptainer/
 │   │   ├── cache/
 │   │   └── tmp/
 │   ├── apptainer-images/
-│   ├── .nextflow
-│   └── nxf-work
+│   ├── .nextflow/
+│   │   ├── cache/
+│   │   └── tmp/
+│   └── nxf-work/
 ├── user2/
 │   ├── .apptainer/
 │   │   ├── cache/
 │   │   └── tmp/
 │   ├── apptainer-images/
-│   ├── .nextflow
-│   └── nxf-work
+│   ├── .nextflow/
+│   │   ├── cache/
+│   │   └── tmp/
+│   └── nxf-work/
 ...
 ```
+
+For additional information, see the [Nextflow environment variable reference](https://docs.seqera.io/nextflow/reference/env-vars/#nextflow-settings).
 
 ### Nextflow Strict Syntax
 
 > [!IMPORTANT]
+> **Nextflow v26.04 and later** use the v2 syntax parser by default as part of the transition toward strict syntax.
 >
-> Nextflow **v26.04** and higher made the **v2 syntax parser** the default as part of the major transition toward strict syntax. However, not all nf-core pipelines have completed this migration yet, and some pipelines can currently fail when parsed with `NXF_SYNTAX_PARSER=v2`. Until the affected pipelines have been migrated, set the following **temporary compatibility workaround** to force the legacy parser before launching them:
+> Some nf-core pipelines may not yet be fully compatible with the v2 parser. If a pipeline fails due to syntax incompatibilities, you can temporarily switch to the legacy parser:
 >
 > ```bash
 > export NXF_SYNTAX_PARSER=v1
 > ```
 >
-> This should be removed once the pipelines you are using becomes compatible with the strict parser.
-> You can read up more about strict syntax [here](https://docs.seqera.io/nextflow/strict-syntax).
+> This workaround should only be used when necessary and removed once the affected pipeline supports the v2 parser.
+>
+> For more information, see the [Nextflow Strict Syntax documentation](https://docs.seqera.io/nextflow/strict-syntax).
 
 ### Nextflow Conda Environment
 
@@ -352,16 +369,18 @@ It is also possible to jump right into an interactive session using the [Open On
 > # export NXF_APPTAINER_CACHEDIR="${PROJ_SCRATCHDIR_CHARITE}/apptainer-images"
 > 
 > # 3. Nextflow-specific Variables
-> # Recommendation by nf-core
-> export NXF_OPTS="-Xms1g -Xmx4g"
-> # Centralize Nextflow cache and Home into one directory
+> # Nextflow home, cache, and temporary directories
 > export NXF_HOME="${PROJ_SCRATCHDIR_CHARITE_USER}/.nextflow"
 > export NXF_CACHE_DIR="${NXF_HOME}"
+> export NXF_TEMP="${NXF_HOME}/tmp"
+> mkdir -p "${NXF_TEMP}"
+> 
+> # Limit memory allocation for the Nextflow JVM
+> export NXF_OPTS="-Xms1g -Xmx4g"
 > 
 > # Temporary workaround for Nextflow strict syntax
-> # Add the line below, so long as the pipeline you are using is not compatible with NXF_SYNTAX_PARSER=v2 (default in Nextflow >=26.04)
-> # This must eventually be removed!
-> export NXF_SYNTAX_PARSER=v1
+> # Uncomment the line below, if the pipeline you are using is not compatible with NXF_SYNTAX_PARSER=v2 (default in Nextflow >=26.04)
+> # export NXF_SYNTAX_PARSER=v1
 > 
 > # Define your workspace directory // Adjust as needed
 > MY_NXF_WORKSPACE="${PROJ_SCRATCHDIR_CHARITE}/my-nxf-workspace"
@@ -437,16 +456,18 @@ After saving the below script under `run-nf-core-pipeline.sh`, submit it with `s
 > # export NXF_APPTAINER_CACHEDIR="${PROJ_SCRATCHDIR_CHARITE}/apptainer-images"
 > 
 > # 3. Nextflow-specific Variables
-> # Recommendation by nf-core
-> export NXF_OPTS="-Xms1g -Xmx4g"
-> # Centralize Nextflow cache and Home into one directory
+> # Nextflow home, cache, and temporary directories
 > export NXF_HOME="${PROJ_SCRATCHDIR_CHARITE_USER}/.nextflow"
 > export NXF_CACHE_DIR="${NXF_HOME}"
+> export NXF_TEMP="${NXF_HOME}/tmp"
+> mkdir -p "${NXF_TEMP}"
+> 
+> # Limit memory allocation for the Nextflow JVM
+> export NXF_OPTS="-Xms1g -Xmx4g"
 > 
 > # Temporary workaround for Nextflow strict syntax
-> # Add the line below, so long as the pipeline you are using is not compatible with NXF_SYNTAX_PARSER=v2 (default in Nextflow >=26.04)
-> # This must eventually be removed!
-> export NXF_SYNTAX_PARSER=v1
+> # Uncomment the line below, if the pipeline you are using is not compatible with NXF_SYNTAX_PARSER=v2 (default in Nextflow >=26.04)
+> # export NXF_SYNTAX_PARSER=v1
 > 
 > # Define your workspace directory // Adjust as needed
 > MY_NXF_WORKSPACE="${PROJ_SCRATCHDIR_CHARITE}/my-nxf-workspace"
@@ -465,6 +486,19 @@ After saving the below script under `run-nf-core-pipeline.sh`, submit it with `s
 > </details>
 
 ## Job Assignment Logic, Resource Allocation, GPU Acceleration
+
+> [!NOTE]
+> Max CPUs and Memory refer to the highest possible ceiling from all nodes within a partition (see [Resource Limits](https://nf-co.re/docs/specifications/configs/general#resource-limits)). For more in-depth information about the number and types of nodes available on the Charité HPC, see the following internal Wiki links:
+> - [SLURM Partitions](https://git.bihealth.org/charite-sc-public/sc-wiki/-/wikis/Resources/User%20Documentation/User%20Guide:%20HPC%20@Charite#slurm-partitions)
+> - [SLURM Partition Overview](https://git.bihealth.org/charite-sc-public/sc-wiki/-/wikis/Resources/User%20Documentation/User%20Guide:%20HPC%20@Charite#slurm-partition-overview)
+> - [SLURM Features and GPU Types](https://git.bihealth.org/charite-sc-public/sc-wiki/-/wikis/Resources/User%20Documentation/User%20Guide:%20HPC%20@Charite#slurm-features-and-gpu-types)
+> 
+
+| Queue     | `compute` | `dragen_cc05` | `dragen_cc15` | `dragen_gp` | `genomics` | `highmem`  | `gpu`     | `pgpu` |
+| :-------------:        | :-------: | :-----------: | :-----------: | :---------: | :--------: | :--------: | :-------: | :----: |
+| **Max CPUs**          | 192       | 64            | 64            | 48          | 192        | 192        | 64        | 128    |
+| **Max Memory**        | 1 TB      | 500 GB        | 500 GB        | 240 GB      | 1 TB       | 4 TB       | 500 GB    | 2 TB   |
+| **Max Time**          | 2 days    | 7 days        | 7 days        | 7 days      | 7 days     | 2 days     | 2 days    | 2 days |
 
 ```mermaid
 ---
@@ -540,7 +574,9 @@ flowchart TB
     style CPU fill:none,stroke:none
 ```
 
-Picture above is the logic that the config follows to determine to which partition SLURM should submit a job to.
+Picture above is the logic that the config follows to determine to which partition SLURM should submit a job to. Regardless of the profile(s) chosen, jobs that can benefit from GPU acceleration will be handled accordingly and submitted either to `gpu` or `pgpu`, depending on how many GPUs are requested, thanks to the [`withLabel:process_gpu`](https://github.com/ScientificComputingCharite/configs/blob/94d14de3345ff93199bf195608ba955321426f8d/conf/charite.config#L38) specification in [`conf/charite.config`](../conf/charite.config).
+
+
 
 > [!IMPORTANT]
 >
@@ -557,14 +593,6 @@ Picture above is the logic that the config follows to determine to which partiti
 > nextflow run nf-core/rnaseq -profile test,charite,genomics ...
 > ```
 >  The last example shown is how you should correctly test pipelines with the `test` dataset provided by nf-core.
-
-Regardless of the profile(s) chosen, jobs that can benefit from GPU acceleration will be handled accordingly and submitted either to `gpu` or `pgpu`, depending on how many GPUs are requested, thanks to the [`withLabel:process_gpu`](https://github.com/ScientificComputingCharite/configs/blob/94d14de3345ff93199bf195608ba955321426f8d/conf/charite.config#L38) specification in [`conf/charite.config`](../conf/charite.config).
-
-| Partition / Queue     | `compute` | `dragen_cc05` | `dragen_cc15` | `dragen_gp` | `genomics` | `highmem`  | `gpu`     | `pgpu` |
-| :-------------:        | :-------: | :-----------: | :-----------: | :---------: | :--------: | :--------: | :-------: | :----: |
-| **Max CPUs**          | 192       | 64            | 64            | 48          | 192        | 192        | 64        | 128    |
-| **Max Memory**        | 1 TB      | 500 GB        | 500 GB        | 240 GB      | 1 TB       | 4 TB       | 500 GB    | 2 TB   |
-| **Max Time**          | 2 days    | 7 days        | 7 days        | 7 days      | 7 days     | 2 days     | 2 days    | 2 days |
 
 ## Known Limitations and Issues
 
