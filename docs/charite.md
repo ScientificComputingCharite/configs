@@ -391,8 +391,6 @@ It is also possible to jump right into an interactive session using the [Open On
 > # Define your workspace directory (i.e. where output will be saved) // Adjust as needed
 > MY_NXF_WORKSPACE="${PROJ_SCRATCHDIR_CHARITE_USER}/nxf-workspace"
 >
-> # Navigate to the workspace
-> cd "${MY_NXF_WORKSPACE}"
 > ```
 > 
 > </details>
@@ -400,14 +398,15 @@ It is also possible to jump right into an interactive session using the [Open On
 Once in an interactive session, you may choose to copy-paste the code snippet...
 
 1. ...into your terminal. With this method however, you must set the variables again every time you start a new session.
-2. ...into your `~/.bashrc` file. After doing so, you must run `source ~/.bashrc` or start a new session, in order for the variables to be exported. Once done, you no longer need to export them with every new session.
+2. ...into your `${HOME}/.bashrc` file. After doing so, you must run `source ${HOME}/.bashrc` or start a new session, in order for the variables to be exported. Once done, you no longer need to export them with every new session.
 
 > [!WARNING]
-> Be mindful of what you add into your `~/.bashrc` file, as it may unexpectedly alter the expected behavior of other existing applications.
-
-Finally, launch your pipeline:
+> Be mindful of what you add into your `${HOME}/.bashrc` file, as it may unexpectedly alter the expected behavior of other existing applications.
 
 ```
+# Navigate to the workspace
+cd "${MY_NXF_WORKSPACE}"
+# Launch the pipeline
 nextflow run nf-core/demo -profile test,charite --outdir results/demo-test
 ```
 
