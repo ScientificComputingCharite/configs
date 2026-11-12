@@ -8,7 +8,7 @@ This page documents the `charite` Nextflow profile for running Nextflow and nf-c
 
 - [Contributors and Acknowledgments](#contributors-and-acknowledgments)
 - [1. Quick Overview and Usage Examples](#1-quick-overview-and-usage-examples)
-- [2. Requesting Charité HPC Access](#2-requesting-hpc-access)
+- [2. Requesting Charité HPC Access](#2-requesting-charité-hpc-access)
 - [3. Environment Setup](#3-environment-setup)
   - [3.1. Redirecting Output to Project Scratch](#31-redirecting-output-to-project-scratch)
   - [3.2. Global Utility Variables](#32-global-utility-variables)
