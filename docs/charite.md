@@ -48,8 +48,8 @@ This page documents the `charite` Nextflow profile for running Nextflow and nf-c
   - Maximum CPUs: 192 cores
   - Maximum memory: 1TB
   - Maximum walltime: 2 days
+- **Additional Queues**: `dragen_cc05`,`dragen_cc15`,`dragen_gp`,`highmem`,`genomics`
 - **GPU Queues**: `gpu`,`pgpu`
-- **Additional Profiles**: `dragen_cc05`,`dragen_cc15`,`dragen_gp`,`highmem`,`genomics`
 
 See [Job Assignment Logic and GPU Acceleration](#5-job-assignment-logic-and-gpu-acceleration) for more info.
 
