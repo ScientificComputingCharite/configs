@@ -520,7 +520,7 @@ After saving the below script under `run-nf-core-demo-test.sh`, submit it with `
 | :-------------: | :-------: | :-----------: | :-----------: | :---------: | :--------: | :--------: | :-------: | :----: |
 | **Max CPUs**    | 192       | 64            | 64            | 48          | 192        | 192        | 64        | 128    |
 | **Max Memory**  | 1 TB      | 500 GB        | 500 GB        | 240 GB      | 1 TB       | 4 TB       | 500 GB    | 2 TB   |
-| **Max Time**      2 days    | 7 days        | 7 days        | 7 days      | 7 days     | 2 days     | 2 days    | 2 days |
+| **Max Time**    | 2 days    | 7 days        | 7 days        | 7 days      | 7 days     | 2 days     | 2 days    | 2 days |
 
 ```mermaid
 ---
