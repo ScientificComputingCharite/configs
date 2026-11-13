@@ -334,7 +334,7 @@ It is also possible to jump right into an interactive session using the [Open On
 > [!NOTE]
 > Checklist for working in an interactive session:
 > - Activate Nextflow with `conda activate nf-core-2026-1`
-> - Update the value of `PROB_ABBR` if you have project scratch available to you
+> - Update the value of `PROJ_ABBR` if you have project scratch available to you
 > - (Optional) Uncomment `export NXF_APPTAINER_CACHEDIR="${PROJ_SCRATCHDIR_CHARITE}/apptainer-images"` if you wish to override the default path of the images cache
 > - (Optional) Uncomment `export NXF_SYNTAX_PARSER=v1` if the pipeline you are using is not compatible with the v2 strict parser
 > - Update the path to your workspace via `MY_NXF_WORKSPACE`
@@ -420,7 +420,7 @@ After saving the below script under `run-nf-core-demo-test.sh`, submit it with `
 > Checklist for working with a Batch script:
 > - Update `#SBATCH --time` to expected runtime of your pipeline (e.g. for a big dataset, consider setting to `12:00:00` or `1-00:00:00`)
 > - (Optional) Add `#SBATCH --mail-user=<your-email>` and `#SBATCH --mail-type=ALL` to get status update notifications
-> - Update the value of `PROB_ABBR` if you have project scratch available to you
+> - Update the value of `PROJ_ABBR` if you have project scratch available to you
 > - (Optional) Uncomment `export NXF_APPTAINER_CACHEDIR="${PROJ_SCRATCHDIR_CHARITE}/apptainer-images"` if you wish to override the default path of the images cache
 > - (Optional) Uncomment `export NXF_SYNTAX_PARSER=v1` if the pipeline you are using is not compatible with the v2 strict parser
 > - Update the path to your workspace via `MY_NXF_WORKSPACE`
