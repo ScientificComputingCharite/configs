@@ -509,7 +509,7 @@ If setting up for the first time, create a file with the name `run-nf-core-demo-
 > - **Optional**: Uncomment `export NXF_APPTAINER_CACHEDIR="${PROJ_SCRATCHDIR_CHARITE}/apptainer-images"` if you wish to override the default path of the images cache
 > - **Optional**: Uncomment `export NXF_SYNTAX_PARSER=v1` if the pipeline you are using is not compatible with the v2 strict parser
 
-If project scratch is available, future pipeline launches should be launched directly from your newly created `${PROJ_SCRATCHDIR_CHARITE_USER}/nxf-workspace` folder, so that SLURM logs get saved there instead of in your home directory.
+If project scratch is available, future pipeline launches should be launched directly from your newly created `MY_NXF_WORKSPACE` folder (set here to `${PROJ_SCRATCHDIR_CHARITE_USER}/nxf-workspace`), so that SLURM logs get saved there instead of in your home directory.
 
 ## 5. Job Assignment Logic and GPU Acceleration
 
