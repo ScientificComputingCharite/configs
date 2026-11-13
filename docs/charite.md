@@ -19,7 +19,11 @@ This page documents the `charite` Nextflow profile for running Nextflow and nf-c
   - [3.5. Shared Nextflow Conda Environment](#35-shared-nextflow-conda-environment)
 - [4. Running Nextflow Workflows on the Charité HPC](#4-running-nextflow-workflows-on-the-charité-hpc)
   - [Option 1: Interactive Session](#option-1-interactive-session)
-  - [Option 2: Batch Script](#option-2-batch-script) 
+    - [Interactive Session via srun](#interactive-session-via-srun)
+    - [Interactive Session via Open OnDemand Portal](#interactive-session-via-open-ondemand-portal)
+    - [Interactive Session Checklist](#interactive-session-checklist)
+  - [Option 2: Batch Script](#option-2-batch-script)
+    - [Batch Script Checklist](#batch-script-checklist)
 - [5. Job Assignment Logic and GPU Acceleration](#5-job-assignment-logic-and-gpu-acceleration)
 - [6. Known Limitations and Issues](#6-known-limitations-and-issues)
 
@@ -331,11 +335,11 @@ It is also possible to jump right into an interactive session using the [Open On
 
 ----
 
-> [!NOTE]
-> Checklist for working in an interactive session:
+#### Interactive Session Checklist
+
 > - Activate Nextflow with `conda activate nf-core-2026-1` 
 > - <details closed>
->   <summary>Copy-paste the complete variables code snippet for your interactive session</summary>
+>   <summary>Click here to reveal the complete variables code snippet for your interactive session</summary>
 > 
 >   ```bash
 >   # Global Utility Variables
@@ -409,7 +413,17 @@ nextflow run nf-core/demo -profile test,charite --outdir results/demo-test
 
 First, `ssh` into a frontend node via your terminal as you normally would (see [Access](https://git.bihealth.org/charite-sc-public/sc-wiki/-/wikis/Resources/User-Documentation/User-Guide:-HPC-@Charite#access)).
 
-After saving the below script under `run-nf-core-demo-test.sh`, submit it with `sbatch run-nf-core-demo-test.sh`.
+```
+# Define your workspace directory (i.e. where output will be saved) // Adjust as needed
+MY_NXF_WORKSPACE="/sc-scratch/sc-scratch-${PROJ_ABBR}/${USER}/nxf-workspace" # For example, if project scratch is available to you
+mkdir -p "${MY_NXF_WORKSPACE}"
+# Navigate to the workspace
+cd "${MY_NXF_WORKSPACE}"
+```
+
+There, create a file with the name `run-nf-core-demo-test.sh`, which will be submitted via `sbatch run-nf-core-demo-test.sh`. The `slurm` directory for saving error and output logs gets created there automatically.
+
+#### Batch Script Checklist
 
 > [!NOTE]
 > Checklist for working with a Batch script:
@@ -478,12 +492,6 @@ After saving the below script under `run-nf-core-demo-test.sh`, submit it with `
 >   ## Optional: Temporary workaround for Nextflow strict syntax
 >   ## Uncomment the line below, if the pipeline you are using is not compatible with NXF_SYNTAX_PARSER=v2 (default in Nextflow >=26.04) to force the legacy v1 parser
 >   ## export NXF_SYNTAX_PARSER=v1
->   
->   # Define your workspace directory (i.e. where output will be saved) // Adjust as needed
->   MY_NXF_WORKSPACE="${PROJ_SCRATCHDIR_CHARITE_USER}/nxf-workspace"
->   mkdir -p "${MY_NXF_WORKSPACE}"
->   # Navigate to the workspace
->   cd "${MY_NXF_WORKSPACE}"
 > 
 >   # Do the work
 >   nextflow run nf-core/demo \
