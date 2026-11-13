@@ -338,7 +338,6 @@ It is also possible to jump right into an interactive session using the [Open On
 >   <summary>Copy-paste the complete variables code snippet for your interactive session</summary>
 > 
 >   ```bash
->   #!/bin/bash
 >   # Global Utility Variables
 >   ## Project abbreviation (leave empty if you don't have one)
 >   export PROJ_ABBR=""
