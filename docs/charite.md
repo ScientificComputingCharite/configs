@@ -413,15 +413,7 @@ nextflow run nf-core/demo -profile test,charite --outdir results/demo-test
 
 First, `ssh` into a frontend node via your terminal as you normally would (see [Access](https://git.bihealth.org/charite-sc-public/sc-wiki/-/wikis/Resources/User-Documentation/User-Guide:-HPC-@Charite#access)).
 
-```
-# Define your workspace directory (i.e. where output will be saved) // Adjust as needed
-MY_NXF_WORKSPACE="/sc-scratch/sc-scratch-${PROJ_ABBR}/${USER}/nxf-workspace" # For example, if project scratch is available to you
-mkdir -p "${MY_NXF_WORKSPACE}"
-# Navigate to the workspace
-cd "${MY_NXF_WORKSPACE}"
-```
-
-There, create a file with the name `run-nf-core-demo-test.sh`, which will be submitted via `sbatch run-nf-core-demo-test.sh`. The `slurm` directory for saving error and output logs gets created there automatically.
+If setting up for the first time, create a file with the name `run-nf-core-demo-test.sh` in your home directory, which will be submitted via `sbatch run-nf-core-demo-test.sh`.
 
 #### Batch Script Checklist
 
@@ -438,7 +430,7 @@ There, create a file with the name `run-nf-core-demo-test.sh`, which will be sub
 >   #SBATCH --ntasks=1
 >   #SBATCH --cpus-per-task=2
 >   #SBATCH --mem=8G
->   #SBATCH --time=01:00:00
+>   #SBATCH --time=00:30:00
 >   #SBATCH --error=slurm/error/%x.%j.err
 >   #SBATCH --output=slurm/output/%x.%j.out
 > 
@@ -493,10 +485,17 @@ There, create a file with the name `run-nf-core-demo-test.sh`, which will be sub
 >   ## Uncomment the line below, if the pipeline you are using is not compatible with NXF_SYNTAX_PARSER=v2 (default in Nextflow >=26.04) to force the legacy v1 parser
 >   ## export NXF_SYNTAX_PARSER=v1
 > 
+>   # Define your workspace directory (i.e. where output will be saved) // Adjust as needed
+>   # For example, if project scratch is available to you
+>   MY_NXF_WORKSPACE="${PROJ_SCRATCHDIR_CHARITE_USER}/nxf-workspace"
+>   mkdir -p "${MY_NXF_WORKSPACE}"
+>   # Navigate to the workspace
+>   cd "${MY_NXF_WORKSPACE}"
+>   
 >   # Do the work
 >   nextflow run nf-core/demo \
 >       -profile test,charite \
->       --outdir demo-test-results
+>       --outdir results/demo-test
 > 
 >       # -r <version> \ # Optional: pin a specific revision of a pipeline
 >       # -resume \ # Optional: resume an interrupted workflow
@@ -510,6 +509,8 @@ There, create a file with the name `run-nf-core-demo-test.sh`, which will be sub
 > - **Optional**: Add `#SBATCH --mail-user=<your-email>` and `#SBATCH --mail-type=ALL` to get status update notifications
 > - **Optional**: Uncomment `export NXF_APPTAINER_CACHEDIR="${PROJ_SCRATCHDIR_CHARITE}/apptainer-images"` if you wish to override the default path of the images cache
 > - **Optional**: Uncomment `export NXF_SYNTAX_PARSER=v1` if the pipeline you are using is not compatible with the v2 strict parser
+
+If project scratch is available, future pipeline launches should be launched directly from your newly created `${PROJ_SCRATCHDIR_CHARITE_USER}/nxf-workspace` folder, so that SLURM logs get saved there instead of in your home directory.
 
 ## 5. Job Assignment Logic and GPU Acceleration
 
