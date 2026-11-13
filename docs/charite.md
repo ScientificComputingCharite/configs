@@ -392,11 +392,8 @@ It is also possible to jump right into an interactive session using the [Open On
 >
 >   - Option 1: Save to `${HOME}/setup-nxf.sh`, then run `bash ${HOME}/setup-nxf.sh`. With this method, you must run `bash ${HOME}/setup-nxf.sh` every time you start a new interactive session.
 >
->   - Option 2: Save to `${HOME}/.bashrc`, then run `source ${HOME}/.bashrc`. With this method, you need only do this once. After starting a new interactive session, the variables are already exported into your environment.
->
-> [!WARNING]
-> Be mindful of what you add into your `${HOME}/.bashrc` file, as it may unexpectedly alter the expected behavior of other existing applications.
->
+>   - Option 2: Add to your `${HOME}/.bashrc` file, then run `source ${HOME}/.bashrc`. With this method, you need only do this once. After starting a new interactive session, the variables are already exported into your environment (PS: be mindful of what you add into your `${HOME}/.bashrc` file, as it may unexpectedly alter the expected behavior of other existing applications).
+> 
 > - Update the value of `PROJ_ABBR` if you have project scratch available to you
 > - (Optional) Uncomment `export NXF_APPTAINER_CACHEDIR="${PROJ_SCRATCHDIR_CHARITE}/apptainer-images"` if you wish to override the default path of the images cache
 > - (Optional) Uncomment `export NXF_SYNTAX_PARSER=v1` if the pipeline you are using is not compatible with the v2 strict parser
