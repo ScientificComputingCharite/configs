@@ -417,7 +417,6 @@ If setting up for the first time, create a file with the name `run-nf-core-demo-
 
 #### Batch Script Checklist
 
-> Checklist for working with a Batch script:
 > - <details closed>
 >   <summary>Click here to copy-paste the complete code snippet for your Batch script</summary>
 >
