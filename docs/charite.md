@@ -413,95 +413,95 @@ After saving the below script under `run-nf-core-demo-test.sh`, submit it with `
 
 > [!NOTE]
 > Checklist for working with a Batch script:
+> - <details closed>
+>   <summary>Click here to copy-paste the complete code snippet for your Batch script</summary>
+>
+>   ```bash
+>   #!/usr/bin/env bash
+>   #SBATCH --job-name=run-nf-core-demo-test
+>   #SBATCH --partition=compute
+>   #SBATCH --qos=normal
+>   #SBATCH --ntasks=1
+>   #SBATCH --cpus-per-task=2
+>   #SBATCH --mem=8G
+>   #SBATCH --time=01:00:00
+>   #SBATCH --error=slurm/error/%x.%j.err
+>   #SBATCH --output=slurm/output/%x.%j.out
+> 
+>   # Initialize Conda
+>   eval "$(conda shell.bash hook)"
+> 
+>   # Activate the environment
+>   conda activate nf-core-2026-1
+> 
+>   # Global Utility Variables
+>   ## Project abbreviation (leave empty if you don't have one)
+>   export PROJ_ABBR=""
+>   if [[ -n "${PROJ_ABBR}" ]]; then
+>       export PROJ_SCRATCHDIR_CHARITE="/sc-scratch/sc-scratch-${PROJ_ABBR}"
+>       # Validate project scratch directory
+>       if [[ ! -d "${PROJ_SCRATCHDIR_CHARITE}" || ! -x "${PROJ_SCRATCHDIR_CHARITE}" ]]; then
+>           echo "[ERROR] Project scratch directory does not exist or is inaccessible: ${PROJ_SCRATCHDIR_CHARITE}"
+>           echo "[ERROR] Please verify your PROJ_ABBR ('${PROJ_ABBR}') and project access."
+>           exit 1
+>       fi
+>       export PROJ_SCRATCHDIR_CHARITE_USER="${PROJ_SCRATCHDIR_CHARITE}/${USER}"
+>   else
+>       export PROJ_SCRATCHDIR_CHARITE_USER="${HOME}"
+>   fi
+>   # Fail-safe: ensure the required environment variable is not empty
+>   if [[ -z "${PROJ_SCRATCHDIR_CHARITE_USER:-}" ]]; then
+>       echo "[ERROR] PROJ_SCRATCHDIR_CHARITE_USER is not set or is empty."
+>       exit 1
+>   fi
+> 
+>   # Apptainer-specific Variables
+>   # Apptainer cache and temporary files (user-specific)
+>   export APPTAINER_CACHEDIR="${PROJ_SCRATCHDIR_CHARITE_USER}/.apptainer"
+>   export APPTAINER_TMPDIR="${PROJ_SCRATCHDIR_CHARITE_USER}/.apptainer/tmp"
+>   mkdir -p "${APPTAINER_TMPDIR}"
+> 
+>   ## Optional: uncomment the line below if you wish to override the default profile path where Apptainer images will be stored
+>   ## Example path provided assigns a shared location for all collaborators of a project. Change as needed
+>   ## export NXF_APPTAINER_CACHEDIR="${PROJ_SCRATCHDIR_CHARITE}/apptainer-images"
+>   
+>   # Nextflow-specific Variables
+>   ## Nextflow home, cache, and temporary directories
+>   export NXF_HOME="${PROJ_SCRATCHDIR_CHARITE_USER}/.nextflow"
+>   export NXF_CACHE_DIR="${PROJ_SCRATCHDIR_CHARITE_USER}/.nextflow"
+>   export NXF_TEMP="${PROJ_SCRATCHDIR_CHARITE_USER}/.nextflow/tmp"
+>   mkdir -p "${NXF_TEMP}"
+> 
+>   ## Limit memory allocation for the Nextflow JVM
+>   export NXF_OPTS="-Xms1g -Xmx4g"
+> 
+>   ## Optional: Temporary workaround for Nextflow strict syntax
+>   ## Uncomment the line below, if the pipeline you are using is not compatible with NXF_SYNTAX_PARSER=v2 (default in Nextflow >=26.04) to force the legacy v1 parser
+>   ## export NXF_SYNTAX_PARSER=v1
+>   
+>   # Define your workspace directory (i.e. where output will be saved) // Adjust as needed
+>   MY_NXF_WORKSPACE="${PROJ_SCRATCHDIR_CHARITE_USER}/nxf-workspace"
+>   mkdir -p "${MY_NXF_WORKSPACE}"
+>   # Navigate to the workspace
+>   cd "${MY_NXF_WORKSPACE}"
+> 
+>   # Do the work
+>   nextflow run nf-core/demo \
+>       -profile test,charite \
+>       --outdir demo-test-results
+> 
+>       # -r <version> \ # Optional: pin a specific revision of a pipeline
+>       # -resume \ # Optional: resume an interrupted workflow
+>       # -c custom-params.config \ # Optional: add an extra config file which contains additional user-defined parameters
+>   ```
+> 
+>   </details>
 > - Update the value of `PROJ_ABBR` if you have project scratch available to you
 > - Update the path to your workspace via `MY_NXF_WORKSPACE`
 > - Update `#SBATCH --time` to expected runtime of your pipeline (e.g. for a big dataset, consider setting to `12:00:00` or `1-00:00:00`)
 > - **Optional**: Add `#SBATCH --mail-user=<your-email>` and `#SBATCH --mail-type=ALL` to get status update notifications
 > - **Optional**: Uncomment `export NXF_APPTAINER_CACHEDIR="${PROJ_SCRATCHDIR_CHARITE}/apptainer-images"` if you wish to override the default path of the images cache
 > - **Optional**: Uncomment `export NXF_SYNTAX_PARSER=v1` if the pipeline you are using is not compatible with the v2 strict parser
-> <details closed>
-> <summary>Click here to copy-paste the complete code snippet for your Batch script</summary>
->
-> ```bash
-> #!/usr/bin/env bash
-> #SBATCH --job-name=run-nf-core-demo-test
-> #SBATCH --partition=compute
-> #SBATCH --qos=normal
-> #SBATCH --ntasks=1
-> #SBATCH --cpus-per-task=2
-> #SBATCH --mem=8G
-> #SBATCH --time=01:00:00
-> #SBATCH --error=slurm/error/%x.%j.err
-> #SBATCH --output=slurm/output/%x.%j.out
-> 
-> # Initialize Conda
-> eval "$(conda shell.bash hook)"
-> 
-> # Activate the environment
-> conda activate nf-core-2026-1
-> 
-> # Global Utility Variables
-> ## Project abbreviation (leave empty if you don't have one)
-> export PROJ_ABBR=""
-> if [[ -n "${PROJ_ABBR}" ]]; then
->     export PROJ_SCRATCHDIR_CHARITE="/sc-scratch/sc-scratch-${PROJ_ABBR}"
->     # Validate project scratch directory
->     if [[ ! -d "${PROJ_SCRATCHDIR_CHARITE}" || ! -x "${PROJ_SCRATCHDIR_CHARITE}" ]]; then
->         echo "[ERROR] Project scratch directory does not exist or is inaccessible: ${PROJ_SCRATCHDIR_CHARITE}"
->         echo "[ERROR] Please verify your PROJ_ABBR ('${PROJ_ABBR}') and project access."
->         exit 1
->     fi
->     export PROJ_SCRATCHDIR_CHARITE_USER="${PROJ_SCRATCHDIR_CHARITE}/${USER}"
-> else
->     export PROJ_SCRATCHDIR_CHARITE_USER="${HOME}"
-> fi
-> # Fail-safe: ensure the required environment variable is not empty
-> if [[ -z "${PROJ_SCRATCHDIR_CHARITE_USER:-}" ]]; then
->     echo "[ERROR] PROJ_SCRATCHDIR_CHARITE_USER is not set or is empty."
->     exit 1
-> fi
-> 
-> # Apptainer-specific Variables
-> # Apptainer cache and temporary files (user-specific)
-> export APPTAINER_CACHEDIR="${PROJ_SCRATCHDIR_CHARITE_USER}/.apptainer"
-> export APPTAINER_TMPDIR="${PROJ_SCRATCHDIR_CHARITE_USER}/.apptainer/tmp"
-> mkdir -p "${APPTAINER_TMPDIR}"
-> 
-> ## Optional: uncomment the line below if you wish to override the default profile path where Apptainer images will be stored
-> ## Example path provided assigns a shared location for all collaborators of a project. Change as needed
-> ## export NXF_APPTAINER_CACHEDIR="${PROJ_SCRATCHDIR_CHARITE}/apptainer-images"
-> 
-> # Nextflow-specific Variables
-> ## Nextflow home, cache, and temporary directories
-> export NXF_HOME="${PROJ_SCRATCHDIR_CHARITE_USER}/.nextflow"
-> export NXF_CACHE_DIR="${PROJ_SCRATCHDIR_CHARITE_USER}/.nextflow"
-> export NXF_TEMP="${PROJ_SCRATCHDIR_CHARITE_USER}/.nextflow/tmp"
-> mkdir -p "${NXF_TEMP}"
-> 
-> ## Limit memory allocation for the Nextflow JVM
-> export NXF_OPTS="-Xms1g -Xmx4g"
-> 
-> ## Optional: Temporary workaround for Nextflow strict syntax
-> ## Uncomment the line below, if the pipeline you are using is not compatible with NXF_SYNTAX_PARSER=v2 (default in Nextflow >=26.04) to force the legacy v1 parser
-> ## export NXF_SYNTAX_PARSER=v1
-> 
-> # Define your workspace directory (i.e. where output will be saved) // Adjust as needed
-> MY_NXF_WORKSPACE="${PROJ_SCRATCHDIR_CHARITE_USER}/nxf-workspace"
->
-> # Navigate to the workspace
-> cd "${MY_NXF_WORKSPACE}"
-> 
-> # Do the work
-> nextflow run nf-core/demo \
->     -profile test,charite \
->     --outdir demo-test-results
-> 
->     # -r <version> \ # Optional: pin a specific revision of a pipeline
->     # -resume \ # Optional: resume an interrupted workflow
->     # -c custom-params.config \ # Optional: add an extra config file which contains additional user-defined parameters
-> ```
-> 
-> </details>
 
 ## 5. Job Assignment Logic and GPU Acceleration
 
