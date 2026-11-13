@@ -334,6 +334,8 @@ It is also possible to jump right into an interactive session using the [Open On
 > [!NOTE]
 > Checklist for working in an interactive session:
 > - Activate Nextflow with `conda activate nf-core-2026-1`
+> - Update the value of `PROJ_ABBR` if you have project scratch available to you
+> - Update the path to your workspace via `MY_NXF_WORKSPACE` 
 > - <details closed>
 >   <summary>Copy-paste the complete variables code snippet for your interactive session</summary>
 > 
@@ -393,12 +395,8 @@ It is also possible to jump right into an interactive session using the [Open On
 >   - Option 1: Save to `${HOME}/setup-nxf.sh`, then run `bash ${HOME}/setup-nxf.sh`. With this method, you must run `bash ${HOME}/setup-nxf.sh` every time you start a new interactive session.
 >
 >   - Option 2: Add to your `${HOME}/.bashrc` file, then run `source ${HOME}/.bashrc`. With this method, you need only do this once. After starting a new interactive session, the variables are already exported into your environment (PS: be mindful of what you add into your `${HOME}/.bashrc` file, as it may unexpectedly alter the expected behavior of other existing applications).
-> 
-> - Update the value of `PROJ_ABBR` if you have project scratch available to you
-> - (Optional) Uncomment `export NXF_APPTAINER_CACHEDIR="${PROJ_SCRATCHDIR_CHARITE}/apptainer-images"` if you wish to override the default path of the images cache
-> - (Optional) Uncomment `export NXF_SYNTAX_PARSER=v1` if the pipeline you are using is not compatible with the v2 strict parser
-> - Update the path to your workspace via `MY_NXF_WORKSPACE`
->
+> - **Optional**: Uncomment `export NXF_APPTAINER_CACHEDIR="${PROJ_SCRATCHDIR_CHARITE}/apptainer-images"` if you wish to override the default path of the images cache
+> - **Optional**: Uncomment `export NXF_SYNTAX_PARSER=v1` if the pipeline you are using is not compatible with the v2 strict parser
 
 ```
 # Navigate to the workspace
@@ -415,12 +413,12 @@ After saving the below script under `run-nf-core-demo-test.sh`, submit it with `
 
 > [!NOTE]
 > Checklist for working with a Batch script:
-> - Update `#SBATCH --time` to expected runtime of your pipeline (e.g. for a big dataset, consider setting to `12:00:00` or `1-00:00:00`)
-> - (Optional) Add `#SBATCH --mail-user=<your-email>` and `#SBATCH --mail-type=ALL` to get status update notifications
 > - Update the value of `PROJ_ABBR` if you have project scratch available to you
-> - (Optional) Uncomment `export NXF_APPTAINER_CACHEDIR="${PROJ_SCRATCHDIR_CHARITE}/apptainer-images"` if you wish to override the default path of the images cache
-> - (Optional) Uncomment `export NXF_SYNTAX_PARSER=v1` if the pipeline you are using is not compatible with the v2 strict parser
 > - Update the path to your workspace via `MY_NXF_WORKSPACE`
+> - Update `#SBATCH --time` to expected runtime of your pipeline (e.g. for a big dataset, consider setting to `12:00:00` or `1-00:00:00`)
+> - **Optional**: Add `#SBATCH --mail-user=<your-email>` and `#SBATCH --mail-type=ALL` to get status update notifications
+> - **Optional**: Uncomment `export NXF_APPTAINER_CACHEDIR="${PROJ_SCRATCHDIR_CHARITE}/apptainer-images"` if you wish to override the default path of the images cache
+> - **Optional**: Uncomment `export NXF_SYNTAX_PARSER=v1` if the pipeline you are using is not compatible with the v2 strict parser
 > <details closed>
 > <summary>Click here to copy-paste the complete code snippet for your Batch script</summary>
 >
